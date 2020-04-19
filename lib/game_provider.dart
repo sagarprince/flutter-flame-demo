@@ -10,6 +10,8 @@ class GameProvider with ChangeNotifier {
   bool _isChainReaction = false;
   bool get isChainReaction => _isChainReaction;
 
+  bool _isExploding = false;
+
   String _playerTurn = players[0];
   String get playerTurn => _playerTurn;
 
@@ -53,13 +55,14 @@ class GameProvider with ChangeNotifier {
           explodeLimit = 3;
         }
 
-        if (electronsCount == explodeLimit) {
+        if (electronsCount >= explodeLimit) {
           _isChainReaction = true;
           Future.microtask(() {
-            Future.delayed(new Duration(milliseconds: 400), () {
-              explode(i, j);
-              Future.delayed(new Duration(milliseconds: 600), () {
-                checkChainReaction();
+            Future.delayed(new Duration(milliseconds: 150), () {
+              explode(i, j, () {
+                Future.delayed(new Duration(milliseconds: 300), () {
+                  checkChainReaction();
+                });
               });
             });
           });
@@ -75,10 +78,10 @@ class GameProvider with ChangeNotifier {
     }
   }
 
-  void explode(int i, int j) {
+  void explode(int i, int j, Function callback) {
     String _player = _matrix[i][j].player;
     _matrix[i][j].isExplode = true;
-    Future.delayed(new Duration(milliseconds: 500), () {
+    Future.delayed(new Duration(milliseconds: 200), () {
       _matrix[i][j].electrons = [];
       _matrix[i][j].player = '';
       AtomModel topAtom = i > 0 ? _matrix[i - 1][j] : null;
@@ -102,6 +105,7 @@ class GameProvider with ChangeNotifier {
         leftAtom.player = _player;
       }
       _matrix[i][j].isExplode = false;
+      callback();
     });
   }
 
