@@ -81,7 +81,7 @@ class GameProvider with ChangeNotifier {
   void explode(int i, int j, Function callback) {
     String _player = _matrix[i][j].player;
     _matrix[i][j].isExplode = true;
-    Future.delayed(new Duration(milliseconds: 200), () {
+    Future.delayed(new Duration(milliseconds: 250), () {
       _matrix[i][j].electrons = [];
       _matrix[i][j].player = '';
       AtomModel topAtom = i > 0 ? _matrix[i - 1][j] : null;
