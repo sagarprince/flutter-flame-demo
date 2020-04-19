@@ -7,10 +7,12 @@ class Provider {
   String _playerTurn = 'red';
   String get playerTurn => _playerTurn;
 
-  void playMove(i, j) {
+  void playMove(i, j, {pTurn = 'red'}) {
+    _playerTurn = pTurn;
     int count = _matrix[i][j].electrons.length;
     _matrix[i][j].electrons.add(count + 1);
     _matrix[i][j].player = _playerTurn;
+    _playerTurn = pTurn == 'blue' ? 'red' : 'blue';
     checkChainReaction();
   }
 
@@ -56,6 +58,7 @@ class Provider {
   }
 
   void explode(i, j) {
+    String _player = _matrix[i][j].player;
     _matrix[i][j].isExplode = true;
     Future.delayed(new Duration(milliseconds: 500), () {
       _matrix[i][j].electrons = [];
@@ -66,19 +69,19 @@ class Provider {
       AtomModel leftAtom = j > 0 ? _matrix[i][j - 1] : null;
       if (topAtom != null && topAtom.electrons.length < 4) {
         topAtom.electrons.add(topAtom.electrons.length + 1);
-        topAtom.player = 'red';
+        topAtom.player = _player;
       }
       if (rightAtom != null && rightAtom.electrons.length < 4) {
         rightAtom.electrons.add(rightAtom.electrons.length + 1);
-        rightAtom.player = 'red';
+        rightAtom.player = _player;
       }
       if (bottomAtom != null && bottomAtom.electrons.length < 4) {
         bottomAtom.electrons.add(bottomAtom.electrons.length + 1);
-        bottomAtom.player = 'red';
+        bottomAtom.player = _player;
       }
       if (leftAtom != null && leftAtom.electrons.length < 4) {
         leftAtom.electrons.add(leftAtom.electrons.length + 1);
-        leftAtom.player = 'red';
+        leftAtom.player = _player;
       }
       _matrix[i][j].isExplode = false;
     });

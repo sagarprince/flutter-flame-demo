@@ -52,9 +52,11 @@ class Square extends PositionComponent with Tapable {
 
   @override
   void onTapDown(TapDownDetails details) {
-    if (atomModel.electrons.length < 4) {
+    if (atomModel.electrons.length < 4 &&
+        (atomModel.player == provider.playerTurn || atomModel.player == '')) {
       _beenTapped = true;
-      this.provider.playMove(atomModel.rowIndex, atomModel.colIndex);
+      this.provider.playMove(atomModel.rowIndex, atomModel.colIndex,
+          pTurn: provider.playerTurn);
     }
   }
 
