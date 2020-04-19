@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flame/components/component.dart';
 import 'package:flame/components/mixins/tapable.dart';
-import 'package:flutter_flame_demo/provider.dart';
+import 'package:flutter_flame_demo/game_provider.dart';
 
 class Square extends PositionComponent with Tapable {
-  Provider provider;
+  GameProvider provider;
   AtomModel atomModel;
   Rect boxRect;
   Paint _boxPaint;
@@ -17,13 +17,12 @@ class Square extends PositionComponent with Tapable {
       double y = 0,
       double width = 60,
       double height = 60,
-      Provider provider,
       AtomModel atomModel}) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
-    this.provider = provider;
+    this.provider = gameProvider;
     this.atomModel = atomModel;
 
     boxRect = Rect.fromLTWH(this.x, this.y, this.width, this.height);
@@ -53,10 +52,10 @@ class Square extends PositionComponent with Tapable {
   @override
   void onTapDown(TapDownDetails details) {
     if (atomModel.electrons.length < 4 &&
-        (atomModel.player == provider.playerTurn || atomModel.player == '')) {
+        (atomModel.player == provider.playerTurn || atomModel.player == '') &&
+        !provider.isChainReaction) {
       _beenTapped = true;
-      this.provider.playMove(atomModel.rowIndex, atomModel.colIndex,
-          pTurn: provider.playerTurn);
+      this.provider.playMove(atomModel.rowIndex, atomModel.colIndex);
     }
   }
 

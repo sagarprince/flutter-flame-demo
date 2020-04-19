@@ -1,22 +1,30 @@
 import 'dart:ui';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_flame_demo/provider.dart';
+import 'package:flame/position.dart';
+import 'package:flutter_flame_demo/game_provider.dart';
 import 'package:flutter_flame_demo/background.dart';
+import 'package:flame/text_config.dart';
 import 'package:flutter_flame_demo/square.dart';
 import 'package:flutter_flame_demo/dots.dart';
 
 class BoxGame extends BaseGame {
-  Provider provider;
   Size screenSize;
   int col = 6;
   int row = 9;
   bool isGridRendering = false;
+  GameProvider provider;
 
-  BoxGame(Provider provider) {
-    this.provider = provider;
+  final TextConfig fpsTextConfig =
+      const TextConfig(color: const Color(0xFFFFFFFF));
+
+  BoxGame() {
+    this.provider = gameProvider;
     add(Background());
   }
+
+  @override
+  bool debugMode() => true;
 
   void buildGrid() {
     if (screenSize != null && !isGridRendering) {
@@ -32,7 +40,6 @@ class BoxGame extends BaseGame {
               y: y,
               width: width,
               height: height,
-              provider: provider,
               atomModel: provider.matrix[i][j]);
           add(square);
           Dots dots = Dots(
@@ -50,6 +57,10 @@ class BoxGame extends BaseGame {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
+    if (debugMode()) {
+      fpsTextConfig.render(canvas, fps(120).floorToDouble().toString(),
+          Position(screenSize.width / 2 - 20, (screenSize.height - 10)));
+    }
   }
 
   @override

@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flame/components/component.dart';
 import 'dart:async';
 import 'dart:ui';
-import 'package:flutter/material.dart' hide Animation, Image;
 import 'package:flame/components/mixins/has_game_ref.dart';
 import 'package:flutter_flame_demo/box_game.dart';
 import 'package:flame/time.dart';
-import 'package:flutter_flame_demo/provider.dart';
+import 'package:flutter_flame_demo/game_provider.dart';
 
 class Dots extends PositionComponent with HasGameRef<BoxGame> {
   double dx = 0;
