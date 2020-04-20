@@ -76,8 +76,8 @@ class Dots extends PositionComponent with HasGameRef<BoxGame> {
 
     var _gradient = LinearGradient(
       begin: Alignment.topLeft,
-      end: Alignment(0.1, 1.0),
-      colors: [const Color(0xFF888888), playerColor], // whitish to gray
+      end: Alignment(0.5, 1.0),
+      colors: [playerColor, playerColor.withOpacity(0.5)], // whitish to gray
       tileMode: TileMode.clamp,
     );
 
