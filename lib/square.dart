@@ -9,7 +9,6 @@ class Square extends PositionComponent with Tapable {
   Rect boxRect;
   Paint _boxPaint;
   Paint _tappedPaint;
-
   bool _beenTapped = false;
 
   Square(
@@ -55,7 +54,7 @@ class Square extends PositionComponent with Tapable {
         (atomModel.player == provider.playerTurn || atomModel.player == '') &&
         !provider.isChainReaction) {
       _beenTapped = true;
-      this.provider.playMove(atomModel.rowIndex, atomModel.colIndex);
+      this.provider.playMove(atomModel.i, atomModel.j);
     }
   }
 
