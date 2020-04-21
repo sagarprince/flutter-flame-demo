@@ -23,13 +23,19 @@ class GameProvider with ChangeNotifier {
   dynamic get winner => _winner;
 
   bool isChainReactionChecking = false;
+  bool isSoundPlaying = false;
 
-  GameProvider() {}
+  List<dynamic> cornerCells = [
+    [0, 0],
+    [8, 0],
+    [8, 5],
+    [0, 5]
+  ];
 
   void startChainReactionChecking() {
     if (!isChainReactionChecking) {
       isChainReactionChecking = true;
-      Timer.periodic(Duration(milliseconds: 200), (timer) {
+      Timer.periodic(Duration(milliseconds: 600), (timer) {
         print(DateTime.now());
         if (!_isChainReaction) {
           if (winner == null) {
@@ -54,38 +60,48 @@ class GameProvider with ChangeNotifier {
   }
 
   void checkChainReaction() {
+    int r = rows - 1;
+    int c = cols - 1;
+
+    // Corner Cells
+    for (var k = 0; k < 4; k++) {
+      if (_matrix[cornerCells[k][0]][cornerCells[k][1]].electrons.length >= 2) {
+        explode(cornerCells[k][0], cornerCells[k][1]);
+        break;
+      }
+    }
+
+    // Left/Right Side Vertical Cells
+    for (var i = 1; i < r; i++) {
+      if (_matrix[i][0].electrons.length >= 3) {
+        explode(i, 0);
+        break;
+      }
+      if (_matrix[i][c].electrons.length >= 3) {
+        explode(i, c);
+        break;
+      }
+    }
+
+    // Top/Bottom Side Horizontal Cells
+    for (var j = 1; j < c; j++) {
+      if (_matrix[0][j].electrons.length >= 3) {
+        explode(0, j);
+        break;
+      }
+      if (_matrix[r][j].electrons.length >= 3) {
+        explode(r, j);
+        break;
+      }
+    }
+
+    // Middle Section Cells by Excluding Side & Corner Cells
     OUTER:
-    for (int i = 0; i < rows; i++) {
-      for (int j = 0; j < cols; j++) {
-        int electronsCount = _matrix[i][j].electrons.length;
-        int explodeLimit = 4;
-
-        // Corner Cells
-        if ((i == 0 && j == 0) ||
-            (i == 0 && j == (cols - 1)) ||
-            (i == (rows - 1) && j == 0) ||
-            (i == (rows - 1) && j == (cols - 1))) {
-          explodeLimit = 2;
-        }
-
-        // Side Cells
-        if (((i > 0 && i < (rows - 1)) && j == 0) ||
-            ((i > 0 && i < (rows - 1)) && j == (cols - 1)) ||
-            ((i == 0) && (j > 0 && j < (cols - 1))) ||
-            ((i == (rows - 1)) && (j > 0 && j < (cols - 1)))) {
-          explodeLimit = 3;
-        }
-
-        if (electronsCount >= explodeLimit) {
-          _isChainReaction = true;
-          Future.microtask(() {
-            Future.delayed(new Duration(milliseconds: 150), () {
-              explode(i, j);
-            });
-          });
+    for (var i = 1; i < r; i++) {
+      for (var j = 1; j < c; j++) {
+        if (_matrix[i][j].electrons.length >= 4) {
+          explode(i, j);
           break OUTER;
-        } else {
-          _isChainReaction = false;
         }
       }
     }
@@ -94,39 +110,46 @@ class GameProvider with ChangeNotifier {
   }
 
   void explode(int i, int j) {
-    if (!_matrix[i][j].isExplode) {
-      Flame.audio.play('boom.wav');
-      String _player = _matrix[i][j].player;
-      _matrix[i][j].isExplode = true;
-      Future.delayed(new Duration(milliseconds: 100), () {
-        Future.delayed(new Duration(milliseconds: 160), () {
-          AtomModel topAtom = i > 0 ? _matrix[i - 1][j] : null;
-          AtomModel rightAtom = j < (cols - 1) ? _matrix[i][j + 1] : null;
-          AtomModel bottomAtom = i < (rows - 1) ? _matrix[i + 1][j] : null;
-          AtomModel leftAtom = j > 0 ? _matrix[i][j - 1] : null;
-          if (topAtom != null && topAtom.electrons.length < 4) {
-            topAtom.electrons.add(topAtom.electrons.length + 1);
-            topAtom.player = _player;
+    Future.microtask(() {
+      _isChainReaction = true;
+      if (!_matrix[i][j].isExplode) {
+        String _player = _matrix[i][j].player;
+        _matrix[i][j].isExplode = true;
+        Future.delayed(new Duration(milliseconds: 100), () {
+          if (!isSoundPlaying) {
+            isSoundPlaying = true;
+            Flame.audio.play('boom.wav');
           }
-          if (rightAtom != null && rightAtom.electrons.length < 4) {
-            rightAtom.electrons.add(rightAtom.electrons.length + 1);
-            rightAtom.player = _player;
-          }
-          if (bottomAtom != null && bottomAtom.electrons.length < 4) {
-            bottomAtom.electrons.add(bottomAtom.electrons.length + 1);
-            bottomAtom.player = _player;
-          }
-          if (leftAtom != null && leftAtom.electrons.length < 4) {
-            leftAtom.electrons.add(leftAtom.electrons.length + 1);
-            leftAtom.player = _player;
-          }
-          _matrix[i][j].player = '';
-          _matrix[i][j].electrons = [];
-          _matrix[i][j].isExplode = false;
-          _isChainReaction = false;
+          Future.delayed(new Duration(milliseconds: 200), () {
+            AtomModel topAtom = i > 0 ? _matrix[i - 1][j] : null;
+            AtomModel rightAtom = j < (cols - 1) ? _matrix[i][j + 1] : null;
+            AtomModel bottomAtom = i < (rows - 1) ? _matrix[i + 1][j] : null;
+            AtomModel leftAtom = j > 0 ? _matrix[i][j - 1] : null;
+            if (topAtom != null && topAtom.electrons.length < 4) {
+              topAtom.electrons.add(topAtom.electrons.length + 1);
+              topAtom.player = _player;
+            }
+            if (rightAtom != null && rightAtom.electrons.length < 4) {
+              rightAtom.electrons.add(rightAtom.electrons.length + 1);
+              rightAtom.player = _player;
+            }
+            if (bottomAtom != null && bottomAtom.electrons.length < 4) {
+              bottomAtom.electrons.add(bottomAtom.electrons.length + 1);
+              bottomAtom.player = _player;
+            }
+            if (leftAtom != null && leftAtom.electrons.length < 4) {
+              leftAtom.electrons.add(leftAtom.electrons.length + 1);
+              leftAtom.player = _player;
+            }
+            _matrix[i][j].player = '';
+            _matrix[i][j].electrons = [];
+            _matrix[i][j].isExplode = false;
+            _isChainReaction = false;
+            isSoundPlaying = false;
+          });
         });
-      });
-    }
+      }
+    });
   }
 
   void checkWinner() {
