@@ -56,16 +56,18 @@ class GameProvider with ChangeNotifier {
 
         if (electronsCount >= explodeLimit) {
           _isChainReaction = true;
-          Future.microtask(() {
-            Future.delayed(new Duration(milliseconds: 150), () {
-              Flame.audio.play('boom.wav');
-              explode(i, j, () {
-                Future.delayed(new Duration(milliseconds: 300), () {
-                  checkChainReaction();
+          if (winner == null) {
+            Future.microtask(() {
+              Future.delayed(new Duration(milliseconds: 150), () {
+                Flame.audio.play('boom.wav');
+                explode(i, j, () {
+                  Future.delayed(new Duration(milliseconds: 200), () {
+                    checkChainReaction();
+                  });
                 });
               });
             });
-          });
+          }
           break OUTER;
         } else {
           _isChainReaction = false;
@@ -73,9 +75,7 @@ class GameProvider with ChangeNotifier {
       }
     }
 
-    if (!_isChainReaction) {
-      checkWinner();
-    }
+    checkWinner();
   }
 
   void explode(int i, int j, Function callback) {
