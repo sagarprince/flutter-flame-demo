@@ -1,6 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flame/components/component.dart';
-import 'dart:ui';
 import 'package:flame/components/mixins/has_game_ref.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_flame_demo/box_game.dart';

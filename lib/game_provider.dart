@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flame/flame.dart';
 
 class GameProvider with ChangeNotifier {
   int rows = 9;
@@ -57,6 +58,7 @@ class GameProvider with ChangeNotifier {
           _isChainReaction = true;
           Future.microtask(() {
             Future.delayed(new Duration(milliseconds: 150), () {
+              Flame.audio.play('boom.wav');
               explode(i, j, () {
                 Future.delayed(new Duration(milliseconds: 300), () {
                   checkChainReaction();
