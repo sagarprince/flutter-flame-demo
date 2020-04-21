@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flame/flame.dart';
 
@@ -21,6 +22,27 @@ class GameProvider with ChangeNotifier {
   dynamic _winner;
   dynamic get winner => _winner;
 
+  bool isChainReactionChecking = false;
+
+  GameProvider() {}
+
+  void startChainReactionChecking() {
+    if (!isChainReactionChecking) {
+      isChainReactionChecking = true;
+      Timer.periodic(Duration(milliseconds: 200), (timer) {
+        print(DateTime.now());
+        if (!_isChainReaction) {
+          if (winner == null) {
+            checkChainReaction();
+          } else {
+            timer.cancel();
+            isChainReactionChecking = false;
+          }
+        }
+      });
+    }
+  }
+
   void playMove(int i, int j) {
     int count = _matrix[i][j].electrons.length;
     _matrix[i][j].electrons.add(count + 1);
@@ -28,7 +50,7 @@ class GameProvider with ChangeNotifier {
     _pTurnIndex = (players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
     _playerTurn = players[_pTurnIndex];
     _pTurnCount++;
-    checkChainReaction();
+    startChainReactionChecking();
   }
 
   void checkChainReaction() {
@@ -56,18 +78,11 @@ class GameProvider with ChangeNotifier {
 
         if (electronsCount >= explodeLimit) {
           _isChainReaction = true;
-          if (winner == null) {
-            Future.microtask(() {
-              Future.delayed(new Duration(milliseconds: 150), () {
-                Flame.audio.play('boom.wav');
-                explode(i, j, () {
-                  Future.delayed(new Duration(milliseconds: 200), () {
-                    checkChainReaction();
-                  });
-                });
-              });
+          Future.microtask(() {
+            Future.delayed(new Duration(milliseconds: 150), () {
+              explode(i, j);
             });
-          }
+          });
           break OUTER;
         } else {
           _isChainReaction = false;
@@ -78,12 +93,13 @@ class GameProvider with ChangeNotifier {
     checkWinner();
   }
 
-  void explode(int i, int j, Function callback) {
+  void explode(int i, int j) {
     if (!_matrix[i][j].isExplode) {
+      Flame.audio.play('boom.wav');
       String _player = _matrix[i][j].player;
       _matrix[i][j].isExplode = true;
-      Future.delayed(new Duration(milliseconds: 250), () {
-        Future.delayed(new Duration(milliseconds: 200), () {
+      Future.delayed(new Duration(milliseconds: 100), () {
+        Future.delayed(new Duration(milliseconds: 160), () {
           AtomModel topAtom = i > 0 ? _matrix[i - 1][j] : null;
           AtomModel rightAtom = j < (cols - 1) ? _matrix[i][j + 1] : null;
           AtomModel bottomAtom = i < (rows - 1) ? _matrix[i + 1][j] : null;
@@ -107,7 +123,7 @@ class GameProvider with ChangeNotifier {
           _matrix[i][j].player = '';
           _matrix[i][j].electrons = [];
           _matrix[i][j].isExplode = false;
-          callback();
+          _isChainReaction = false;
         });
       });
     }
