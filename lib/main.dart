@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flame/util.dart';
+import 'package:flame/flame.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_flame_demo/game_provider.dart';
@@ -13,9 +14,13 @@ void main() async {
       statusBarBrightness:
           Brightness.dark // Dark == white status bar -- for IOS.
       ));
+  Flame.audio.disableLog();
   Util flameUtil = Util();
 //  await flameUtil.fullScreen();
   await flameUtil.setOrientation(DeviceOrientation.portraitUp);
+  await Flame.audio.loadAll(<String>[
+    'boom.wav',
+  ]);
   final BoxGame boxGame = new BoxGame();
   runApp(MyGame(game: boxGame));
 }
