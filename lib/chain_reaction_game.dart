@@ -2,24 +2,24 @@ import 'dart:ui';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/position.dart';
-import 'package:flutter_flame_demo/game_provider.dart';
+import 'package:flutter_flame_demo/game_service.dart';
 import 'package:flutter_flame_demo/background.dart';
 import 'package:flame/text_config.dart';
-import 'package:flutter_flame_demo/square.dart';
-import 'package:flutter_flame_demo/dots.dart';
+import 'package:flutter_flame_demo/cell.dart';
+import 'package:flutter_flame_demo/orbs.dart';
 
-class BoxGame extends BaseGame {
+class ChainReactionGame extends BaseGame {
   Size screenSize;
   int col = 6;
   int row = 9;
   bool isGridRendering = false;
-  GameProvider provider;
+  GameService service;
 
   final TextConfig fpsTextConfig =
       const TextConfig(color: const Color(0xFFFFFFFF));
 
-  BoxGame() {
-    this.provider = gameProvider;
+  ChainReactionGame() {
+    this.service = gameService;
     add(Background());
   }
 
@@ -29,26 +29,27 @@ class BoxGame extends BaseGame {
   void buildGrid() {
     if (screenSize != null && !isGridRendering) {
       isGridRendering = true;
-      for (int i = 0; i < provider.matrix.length; i++) {
-        for (int j = 0; j < provider.matrix[i].length; j++) {
+      for (int i = 0; i < service.matrix.length; i++) {
+        for (int j = 0; j < service.matrix[i].length; j++) {
           double width = (screenSize.width / col);
           double height = (screenSize.height / row);
           double x = j * width;
           double y = i * height;
-          Square square = Square(
+          Cell cell = Cell(
               x: x,
               y: y,
               width: width,
               height: height,
-              atomModel: provider.matrix[i][j]);
-          add(square);
-          Dots dots = Dots(
+              cellModel: service.matrix[i][j]);
+          add(cell);
+
+          Orbs orbs = Orbs(
               x: x,
               y: y,
               width: width,
               height: height,
-              atomModel: provider.matrix[i][j]);
-          add(dots);
+              cellModel: service.matrix[i][j]);
+          add(orbs);
         }
       }
     }

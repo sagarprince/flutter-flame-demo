@@ -1,34 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flame/components/component.dart';
 import 'package:flame/components/mixins/tapable.dart';
-import 'package:flutter_flame_demo/game_provider.dart';
+import 'package:flutter_flame_demo/models.dart';
+import 'package:flutter_flame_demo/game_service.dart';
 
-class Square extends PositionComponent with Tapable {
-  GameProvider provider;
-  AtomModel atomModel;
+class Cell extends PositionComponent with Tapable {
+  GameService service;
+  CellModel cellModel;
   Rect boxRect;
   Paint _boxPaint;
   Paint _tappedPaint;
   bool _beenTapped = false;
 
-  Square(
+  Cell(
       {double x = 0,
       double y = 0,
       double width = 60,
       double height = 60,
-      AtomModel atomModel}) {
+      CellModel cellModel}) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
-    this.provider = gameProvider;
-    this.atomModel = atomModel;
+    this.service = gameService;
+    this.cellModel = cellModel;
 
     boxRect = Rect.fromLTWH(this.x, this.y, this.width, this.height);
-    _boxPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = const Color(0xff6ab04c);
     _tappedPaint = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = 1
@@ -37,6 +34,11 @@ class Square extends PositionComponent with Tapable {
 
   @override
   void render(Canvas c) {
+    Color playerColor = service.getPlayerColor(service.playerTurn);
+    _boxPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = playerColor;
     c.drawRect(boxRect, _beenTapped ? _tappedPaint : _boxPaint);
   }
 
@@ -50,11 +52,11 @@ class Square extends PositionComponent with Tapable {
 
   @override
   void onTapDown(TapDownDetails details) {
-    if (atomModel.electrons.length < 4 &&
-        (atomModel.player == provider.playerTurn || atomModel.player == '') &&
-        !provider.isChainReaction) {
+    if (cellModel.orbs.length < 4 &&
+        (cellModel.player == service.playerTurn || cellModel.player == '') &&
+        !service.isChainReaction) {
       _beenTapped = true;
-      this.provider.playMove(atomModel.i, atomModel.j);
+      this.service.playMove(cellModel.i, cellModel.j);
     }
   }
 

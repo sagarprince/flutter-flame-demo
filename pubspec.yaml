@@ -45,6 +45,7 @@ flutter:
   assets:
     - assets/images/
     - assets/audio/boom.wav
+    - assets/audio/pop.mp3
 
   # To add assets to your application, add an assets section, like this:
   # assets:

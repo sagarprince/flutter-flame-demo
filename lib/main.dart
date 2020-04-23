@@ -3,8 +3,8 @@ import 'package:flame/util.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_flame_demo/game_provider.dart';
-import 'package:flutter_flame_demo/box_game.dart';
+import 'package:flutter_flame_demo/game_service.dart';
+import 'package:flutter_flame_demo/chain_reaction_game.dart';
 import 'package:flutter_flame_demo/winner.dart';
 
 void main() async {
@@ -19,14 +19,14 @@ void main() async {
 //  await flameUtil.fullScreen();
   await flameUtil.setOrientation(DeviceOrientation.portraitUp);
   await Flame.audio.loadAll(<String>[
-    'boom.wav',
+    'pop.mp3',
   ]);
-  final BoxGame boxGame = new BoxGame();
-  runApp(MyGame(game: boxGame));
+  final ChainReactionGame chainReactionGame = new ChainReactionGame();
+  runApp(MyGame(game: chainReactionGame));
 }
 
 class MyGame extends StatelessWidget {
-  final BoxGame game;
+  final ChainReactionGame game;
 
   MyGame({Key key, this.game}) : super(key: key);
 
@@ -34,10 +34,10 @@ class MyGame extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => gameProvider),
+        ChangeNotifierProvider(create: (_) => gameService),
       ],
       child: MaterialApp(
-        title: 'Flame Game Demo',
+        title: 'Chain Reaction Game',
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           backgroundColor: const Color(0xff222222),
@@ -49,7 +49,7 @@ class MyGame extends StatelessWidget {
 }
 
 class Home extends StatelessWidget {
-  final BoxGame game;
+  final ChainReactionGame game;
 
   Home({Key key, this.game}) : super(key: key);
 

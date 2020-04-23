@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flame/components/component.dart';
 import 'package:flame/components/mixins/has_game_ref.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter_flame_demo/box_game.dart';
-import 'package:flutter_flame_demo/game_provider.dart';
+import 'package:flutter_flame_demo/chain_reaction_game.dart';
+import 'package:flutter_flame_demo/models.dart';
+import 'package:flutter_flame_demo/game_service.dart';
 import 'package:flutter_flame_demo/utilities.dart';
 
-class Dots extends PositionComponent with HasGameRef<BoxGame> {
-  int rows = gameProvider.rows;
-  int cols = gameProvider.cols;
+class Orbs extends PositionComponent with HasGameRef<ChainReactionGame> {
+  int rows = gameService.rows;
+  int cols = gameService.cols;
   double dx = 0;
   double dy = 0;
   double middleDx = 0;
@@ -21,29 +22,29 @@ class Dots extends PositionComponent with HasGameRef<BoxGame> {
   double bottomDx = 0;
   double bottomDy = 0;
 
-  AtomModel atomModel;
+  CellModel cellModel;
 
-  double _speed = 120.0;
+  double _speed = 80.0;
 
-  Dots(
+  Orbs(
       {double x = 0,
       double y = 0,
       double width = 0,
       double height = 0,
-      AtomModel atomModel}) {
-    this.atomModel = atomModel;
+      CellModel cellModel}) {
+    this.cellModel = cellModel;
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
     this.dx = (x + width / 2);
     this.dy = (y + height / 2);
-    setDotsPositions();
+    setOrbsPositions();
   }
 
-  void setDotsPositions() {
-    int i = atomModel.i;
-    int j = atomModel.j;
+  void setOrbsPositions() {
+    int i = cellModel.i;
+    int j = cellModel.j;
 
     if ((i == 0 && j == 0) ||
         (i == (rows - 1) && j == 0) ||
@@ -101,9 +102,9 @@ class Dots extends PositionComponent with HasGameRef<BoxGame> {
     }
   }
 
-  void explodeDotsPositions(double t) {
-    int i = atomModel.i;
-    int j = atomModel.j;
+  void explodeOrbsPositions(double t) {
+    int i = cellModel.i;
+    int j = cellModel.j;
 
     if (i == 0 && j == 0) {
       // Top-Left Corner
@@ -144,36 +145,22 @@ class Dots extends PositionComponent with HasGameRef<BoxGame> {
     }
   }
 
-  Color get playerColor {
-    if (atomModel.player == 'blue') {
-      return Colors.blue;
-    } else if (atomModel.player == 'green') {
-      return Colors.green;
-    } else if (atomModel.player == 'yellow') {
-      return Colors.yellow;
-    } else if (atomModel.player == 'orange') {
-      return Colors.orange;
-    } else {
-      return Colors.red;
-    }
-  }
-
   @override
   void render(Canvas canvas) {
-    atomModel.electrons.sort((a, b) => b - a);
-    if (atomModel.electrons.length > 0) {
-      atomModel.electrons.forEach((index) {
+    cellModel.orbs.sort((a, b) => b - a);
+    if (cellModel.orbs.length > 0) {
+      cellModel.orbs.forEach((index) {
         if (index == 1) {
-          _drawDot(canvas, middleDx, middleDy);
+          _drawOrb(canvas, middleDx, middleDy);
         }
         if (index == 2) {
-          _drawDot(canvas, leftDx, leftDy);
+          _drawOrb(canvas, leftDx, leftDy);
         }
         if (index == 3) {
-          _drawDot(canvas, rightDx, rightDy);
+          _drawOrb(canvas, rightDx, rightDy);
         }
         if (index == 4) {
-          _drawDot(canvas, bottomDx, bottomDy);
+          _drawOrb(canvas, bottomDx, bottomDy);
         }
       });
     }
@@ -181,18 +168,20 @@ class Dots extends PositionComponent with HasGameRef<BoxGame> {
 
   @override
   void update(double t) {
-    if (atomModel.electrons.length > 0 && atomModel.isExplode) {
-      explodeDotsPositions(t);
+    if (cellModel.orbs.length > 0 && cellModel.isExplode) {
+      explodeOrbsPositions(t);
     } else {
-      setDotsPositions();
+      setOrbsPositions();
     }
   }
 
-  void _drawDot(Canvas canvas, double dx, double dy) {
+  void _drawOrb(Canvas canvas, double dx, double dy) {
     Rect circleRect = new Rect.fromCircle(
       center: new Offset(dx, dy),
       radius: 10.0,
     );
+
+    Color playerColor = gameService.getPlayerColor(cellModel.player);
 
     var _gradient = LinearGradient(
       begin: Alignment.topLeft,
