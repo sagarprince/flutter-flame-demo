@@ -57,7 +57,7 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        padding: EdgeInsets.only(left: 5, right: 5),
+        padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 20),
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[

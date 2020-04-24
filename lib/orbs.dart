@@ -150,16 +150,16 @@ class Orbs extends PositionComponent with HasGameRef<ChainReactionGame> {
     cellModel.orbs.sort((a, b) => b - a);
     if (cellModel.orbs.length > 0) {
       cellModel.orbs.forEach((index) {
-        if (index == 1) {
+        if (index == 1 && middleDx > 0 && middleDy > 0) {
           _drawOrb(canvas, middleDx, middleDy);
         }
-        if (index == 2) {
+        if (index == 2 && leftDx > 0 && leftDx > 0) {
           _drawOrb(canvas, leftDx, leftDy);
         }
-        if (index == 3) {
+        if (index == 3 && rightDx > 0 && rightDy > 0) {
           _drawOrb(canvas, rightDx, rightDy);
         }
-        if (index == 4) {
+        if (index == 4 && bottomDx > 0 && bottomDy > 0) {
           _drawOrb(canvas, bottomDx, bottomDy);
         }
       });

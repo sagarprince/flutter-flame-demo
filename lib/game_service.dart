@@ -27,6 +27,10 @@ class GameService with ChangeNotifier {
   bool isChainReactionChecking = false;
   bool isSoundPlaying = false;
 
+  GameService() {
+    testingData();
+  }
+
   void playMove(int i, int j) {
     addOrbToCell(i, j, _playerTurn);
     _pTurnIndex = (players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
@@ -35,7 +39,6 @@ class GameService with ChangeNotifier {
   }
 
   void addOrbToCell(int i, int j, String player) {
-    print(_playerTurn);
     int count = _matrix[i][j].orbs.length;
     _matrix[i][j].orbs.add(count + 1);
     _matrix[i][j].player = player;
@@ -90,6 +93,7 @@ class GameService with ChangeNotifier {
             CellModel rightCell = j < (cols - 1) ? _matrix[i][j + 1] : null;
             CellModel bottomCell = i < (rows - 1) ? _matrix[i + 1][j] : null;
             CellModel leftCell = j > 0 ? _matrix[i][j - 1] : null;
+
             if (topCell != null && topCell.orbs.length < 4) {
               addOrbToCell(i - 1, j, _player);
             }
@@ -206,6 +210,38 @@ class GameService with ChangeNotifier {
         break;
       default:
         return Colors.red;
+    }
+  }
+
+  // Testing
+  void testingData() {
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        _pTurnIndex =
+            (players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
+        _playerTurn = players[_pTurnIndex];
+        _pTurnCount++;
+        _matrix[i][j].player = _playerTurn;
+
+        // Corner Cells
+        if (((i == 0 && j == 0 ||
+            i == 0 && j == (cols - 1) ||
+            i == (rows - 1) && j == 0 ||
+            i == (rows - 1) && j == (cols - 1)))) {
+          _matrix[i][j].orbs = [1];
+        }
+
+        // Vertical/Horizontal Side Cells
+        else if (((i > 0 && i < (rows - 1) && (j == 0 || j == (cols - 1))) ||
+            (j > 0 && j < (cols - 1) && (i == 0 || i == (rows - 1))))) {
+          _matrix[i][j].orbs = [1, 2];
+        }
+
+        // Middle Cells
+        else {
+          _matrix[i][j].orbs = [1, 2, 3];
+        }
+      }
     }
   }
 }
