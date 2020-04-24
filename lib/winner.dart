@@ -24,7 +24,7 @@ class Winner extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Text(
-                            '${winner != null ? winner['player'].toString().toUpperCase() : 'RED'} is winner !!!',
+                            '${winner != null ? winner.toString().toUpperCase() : 'RED'} is winner !!!',
                             style:
                                 TextStyle(color: Colors.white, fontSize: 16.0))
                       ],

@@ -28,7 +28,7 @@ class GameService with ChangeNotifier {
   bool isSoundPlaying = false;
 
   GameService() {
-    testingData();
+//    testingData();
   }
 
   void playMove(int i, int j) {
@@ -123,25 +123,26 @@ class GameService with ChangeNotifier {
       Future.microtask(() {
         Future.delayed(Duration(milliseconds: 800), () {
           if (_pTurnCount >= players.length) {
-            List<dynamic> playerCellsCount = [];
-            for (int i = 0; i < rows; i++) {
-              for (int j = 0; j < cols; j++) {
-                CellModel cell = _matrix[i][j];
-                if (cell.player != '' && cell.orbs.length > 0) {
-                  int index = playerCellsCount
-                      .indexWhere((x) => x['player'] == cell.player);
-                  if (index == -1) {
-                    playerCellsCount.add({'player': cell.player, 'count': 1});
-                  } else {
-                    playerCellsCount[index]['count']++;
-                  }
+            Map<String, int> filledCells = {};
+            int total = rows * cols;
+            for (int k = 0; k < total; k++) {
+              int i = k ~/ cols; // determines i
+              int j = k % cols; // determines j
+              CellModel cell = _matrix[i][j];
+              if (cell.player != '' && cell.orbs.length > 0) {
+                if (filledCells[cell.player] != null) {
+                  filledCells[cell.player]++;
+                } else {
+                  filledCells[cell.player] = 1;
                 }
               }
             }
 
-            if (playerCellsCount.length == 1) {
-              _winner = playerCellsCount[0];
-              _playerTurn = _winner['player'];
+            var filtered = Map.of(filledCells)..removeWhere((k, v) => v == 0);
+            var filteredList = filtered.keys.toList();
+            if (filteredList.length == 1) {
+              _winner = filteredList[0];
+              _playerTurn = _winner;
               notifyListeners();
               stopInfinityChainReactions();
             }
@@ -152,40 +153,42 @@ class GameService with ChangeNotifier {
   }
 
   void stopInfinityChainReactions() {
-    for (int i = 0; i < rows; i++) {
-      for (int j = 0; j < cols; j++) {
-        // Corner Cells
-        if (((i == 0 && j == 0 ||
-                i == 0 && j == (cols - 1) ||
-                i == (rows - 1) && j == 0 ||
-                i == (rows - 1) && j == (cols - 1))) &&
-            _matrix[i][j].orbs.length == 2) {
-          _matrix[i][j].orbs = [1];
-        }
+    int total = rows * cols;
+    for (int k = 0; k < total; k++) {
+      int i = k ~/ cols; // determines i
+      int j = k % cols; // determines j
+      // Corner Cells
+      if (((i == 0 && j == 0 ||
+              i == 0 && j == (cols - 1) ||
+              i == (rows - 1) && j == 0 ||
+              i == (rows - 1) && j == (cols - 1))) &&
+          _matrix[i][j].orbs.length == 2) {
+        _matrix[i][j].orbs = [1];
+      }
 
-        // Vertical/Horizontal Side Cells
-        else if (((i > 0 && i < (rows - 1) && (j == 0 || j == (cols - 1))) ||
-                (j > 0 && j < (cols - 1) && (i == 0 || i == (rows - 1)))) &&
-            _matrix[i][j].orbs.length == 3) {
-          _matrix[i][j].orbs = [1, 2];
-        }
+      // Vertical/Horizontal Side Cells
+      else if (((i > 0 && i < (rows - 1) && (j == 0 || j == (cols - 1))) ||
+              (j > 0 && j < (cols - 1) && (i == 0 || i == (rows - 1)))) &&
+          _matrix[i][j].orbs.length == 3) {
+        _matrix[i][j].orbs = [1, 2];
+      }
 
-        // Middle Cells
-        else {
-          if (_matrix[i][j].orbs.length == 4) {
-            _matrix[i][j].orbs = [1, 2, 3];
-          }
+      // Middle Cells
+      else {
+        if (_matrix[i][j].orbs.length == 4) {
+          _matrix[i][j].orbs = [1, 2, 3];
         }
       }
     }
   }
 
   void reset() {
-    for (int i = 0; i < rows; i++) {
-      for (int j = 0; j < cols; j++) {
-        _matrix[i][j].player = '';
-        _matrix[i][j].orbs = [];
-      }
+    int total = rows * cols;
+    for (int k = 0; k < total; k++) {
+      int i = k ~/ cols; // determines i
+      int j = k % cols; // determines j
+      _matrix[i][j].player = '';
+      _matrix[i][j].orbs = [];
     }
     _pTurnIndex = 0;
     _playerTurn = players[_pTurnIndex];
@@ -215,32 +218,33 @@ class GameService with ChangeNotifier {
 
   // Testing
   void testingData() {
-    for (int i = 0; i < rows; i++) {
-      for (int j = 0; j < cols; j++) {
-        _pTurnIndex =
-            (players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
-        _playerTurn = players[_pTurnIndex];
-        _pTurnCount++;
-        _matrix[i][j].player = _playerTurn;
+    int total = rows * cols;
+    for (int k = 0; k < total; k++) {
+      int i = k ~/ cols; // determines i
+      int j = k % cols; // determines j
 
-        // Corner Cells
-        if (((i == 0 && j == 0 ||
-            i == 0 && j == (cols - 1) ||
-            i == (rows - 1) && j == 0 ||
-            i == (rows - 1) && j == (cols - 1)))) {
-          _matrix[i][j].orbs = [1];
-        }
+      _pTurnIndex = (players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
+      _playerTurn = players[_pTurnIndex];
+      _pTurnCount++;
+      _matrix[i][j].player = _playerTurn;
 
-        // Vertical/Horizontal Side Cells
-        else if (((i > 0 && i < (rows - 1) && (j == 0 || j == (cols - 1))) ||
-            (j > 0 && j < (cols - 1) && (i == 0 || i == (rows - 1))))) {
-          _matrix[i][j].orbs = [1, 2];
-        }
+      // Corner Cells
+      if (((i == 0 && j == 0 ||
+          i == 0 && j == (cols - 1) ||
+          i == (rows - 1) && j == 0 ||
+          i == (rows - 1) && j == (cols - 1)))) {
+        _matrix[i][j].orbs = [1];
+      }
 
-        // Middle Cells
-        else {
-          _matrix[i][j].orbs = [1, 2, 3];
-        }
+      // Vertical/Horizontal Side Cells
+      else if (((i > 0 && i < (rows - 1) && (j == 0 || j == (cols - 1))) ||
+          (j > 0 && j < (cols - 1) && (i == 0 || i == (rows - 1))))) {
+        _matrix[i][j].orbs = [1, 2];
+      }
+
+      // Middle Cells
+      else {
+        _matrix[i][j].orbs = [1, 2, 3];
       }
     }
   }
