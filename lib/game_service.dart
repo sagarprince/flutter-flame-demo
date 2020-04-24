@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flame/flame.dart';
@@ -31,11 +32,28 @@ class GameService with ChangeNotifier {
 //    testingData();
   }
 
-  void playMove(int i, int j) {
-    addOrbToCell(i, j, _playerTurn);
+  void nextPlayer() {
     _pTurnIndex = (players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
     _playerTurn = players[_pTurnIndex];
     _pTurnCount++;
+  }
+
+  void playMove(int i, int j) {
+    addOrbToCell(i, j, _playerTurn);
+    nextPlayer();
+    botPlayMove();
+  }
+
+  void botPlayMove() {
+    if (!_isChainReaction) {
+      Random _random = Random();
+      int i = _random.nextInt(rows);
+      int j = _random.nextInt(cols);
+      Future.delayed(Duration(milliseconds: 500), () {
+        addOrbToCell(i, j, _playerTurn);
+        nextPlayer();
+      });
+    }
   }
 
   void addOrbToCell(int i, int j, String player) {
