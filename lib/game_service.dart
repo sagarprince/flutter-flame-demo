@@ -32,27 +32,31 @@ class GameService with ChangeNotifier {
 //    testingData();
   }
 
-  void nextPlayer() {
+  void playMove(int i, int j) {
+    addOrbToCell(i, j, _playerTurn);
+    setNextPlayer();
+  }
+
+  void setNextPlayer() {
     _pTurnIndex = (players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
     _playerTurn = players[_pTurnIndex];
     _pTurnCount++;
   }
 
-  void playMove(int i, int j) {
-    addOrbToCell(i, j, _playerTurn);
-    nextPlayer();
-    botPlayMove();
-  }
-
-  void botPlayMove() {
-    if (!_isChainReaction) {
+  void playBotMove() {
+    if (!_isChainReaction && winner == null && _pTurnIndex == 1) {
       Random _random = Random();
       int i = _random.nextInt(rows);
       int j = _random.nextInt(cols);
-      Future.delayed(Duration(milliseconds: 500), () {
+      CellModel cell = _matrix[i][j];
+      if (cell.player == '' || cell.player == _playerTurn) {
+        print('bot played');
         addOrbToCell(i, j, _playerTurn);
-        nextPlayer();
-      });
+        setNextPlayer();
+      } else {
+        print('find another move');
+        playBotMove();
+      }
     }
   }
 
