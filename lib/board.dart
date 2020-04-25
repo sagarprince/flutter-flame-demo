@@ -70,6 +70,18 @@ class Board {
     return _matrix;
   }
 
+  List<List<dynamic>> reset(List<List<dynamic>> matrix) {
+    List<List<dynamic>> _matrix = deepCopy(matrix);
+    int total = rows * cols;
+    for (int k = 0; k < total; k++) {
+      int i = k ~/ cols; // determines i
+      int j = k % cols; // determines j
+      _matrix[i][j][0] = 0;
+      _matrix[i][j][1] = CellInfo();
+    }
+    return _matrix;
+  }
+
   List<List<dynamic>> deepCopy(List<List<dynamic>> matrix) {
     return []..addAll(matrix);
   }

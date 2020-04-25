@@ -59,7 +59,8 @@ class Cell extends PositionComponent with Tapable {
     int orbs = positionData[0];
     CellInfo cellInfo = positionData[1];
     if (orbs <= 3 &&
-        (cellInfo.player == service.playerTurn || cellInfo.player == '')) {
+        (cellInfo.player == service.playerTurn || cellInfo.player == '') &&
+        !service.isChainReaction) {
       _beenTapped = true;
       this.service.playMove(pos, service.playerTurn);
     }
