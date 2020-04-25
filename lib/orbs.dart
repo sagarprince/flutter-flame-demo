@@ -8,9 +8,12 @@ import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/game_service.dart';
 import 'package:flutter_flame_demo/utilities.dart';
 
+const ORB_EXPLODE_SPEED = 80.0;
+
 class Orbs extends PositionComponent with HasGameRef<ChainReactionGame> {
   int rows = gameService.rows;
   int cols = gameService.cols;
+
   double dx = 0;
   double dy = 0;
   double middleDx = 0;
@@ -22,29 +25,33 @@ class Orbs extends PositionComponent with HasGameRef<ChainReactionGame> {
   double bottomDx = 0;
   double bottomDy = 0;
 
-  CellModel cellModel;
-
-  double _speed = 80.0;
+  Position pos;
+  dynamic positionData;
 
   Orbs(
       {double x = 0,
       double y = 0,
       double width = 0,
       double height = 0,
-      CellModel cellModel}) {
-    this.cellModel = cellModel;
+      Position pos,
+      dynamic positionData}) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
     this.dx = (x + width / 2);
     this.dy = (y + height / 2);
+    this.pos = pos;
+    this.positionData = positionData;
     setOrbsPositions();
   }
 
+  int get orbs => positionData[0];
+  CellInfo get cellInfo => positionData[1];
+
   void setOrbsPositions() {
-    int i = cellModel.i;
-    int j = cellModel.j;
+    int i = pos.i;
+    int j = pos.j;
 
     if ((i == 0 && j == 0) ||
         (i == (rows - 1) && j == 0) ||
@@ -103,53 +110,52 @@ class Orbs extends PositionComponent with HasGameRef<ChainReactionGame> {
   }
 
   void explodeOrbsPositions(double t) {
-    int i = cellModel.i;
-    int j = cellModel.j;
+    int i = pos.i;
+    int j = pos.j;
 
     if (i == 0 && j == 0) {
       // Top-Left Corner
-      middleDy = middleDy + (t * _speed);
-      leftDx = leftDx + (t * _speed);
+      middleDy = middleDy + (t * ORB_EXPLODE_SPEED);
+      leftDx = leftDx + (t * ORB_EXPLODE_SPEED);
     } else if (i == 0 && j == (cols - 1)) {
       // Top-Right Corner
-      middleDy = middleDy + (t * _speed);
-      leftDx = leftDx - (t * _speed);
+      middleDy = middleDy + (t * ORB_EXPLODE_SPEED);
+      leftDx = leftDx - (t * ORB_EXPLODE_SPEED);
     } else if (i == (rows - 1) && j == 0) {
       // Bottom-Left Corner
-      middleDx = middleDx + (t * _speed);
-      leftDy = leftDy - (t * _speed);
+      middleDx = middleDx + (t * ORB_EXPLODE_SPEED);
+      leftDy = leftDy - (t * ORB_EXPLODE_SPEED);
     } else if (i == (rows - 1) && j == (cols - 1)) {
       // Bottom-Right Corner
-      middleDx = middleDx - (t * _speed);
-      leftDy = leftDy - (t * _speed);
+      middleDx = middleDx - (t * ORB_EXPLODE_SPEED);
+      leftDy = leftDy - (t * ORB_EXPLODE_SPEED);
     } else if ((i == 0) && (j > 0 && j < (cols - 1))) {
       // Top Side
-      middleDy = middleDy + (t * _speed);
-      leftDx = leftDx - (t * _speed);
-      rightDx = rightDx + (t * _speed);
+      middleDy = middleDy + (t * ORB_EXPLODE_SPEED);
+      leftDx = leftDx - (t * ORB_EXPLODE_SPEED);
+      rightDx = rightDx + (t * ORB_EXPLODE_SPEED);
     } else if ((i > 0 && i < (rows - 1)) && j == 0) {
       // Left Side
-      middleDx = middleDx + (t * _speed);
-      leftDy = leftDy - (t * _speed);
-      rightDy = rightDy + (t * _speed);
+      middleDx = middleDx + (t * ORB_EXPLODE_SPEED);
+      leftDy = leftDy - (t * ORB_EXPLODE_SPEED);
+      rightDy = rightDy + (t * ORB_EXPLODE_SPEED);
     } else if ((i > 0 && i < (rows - 1)) && j == (cols - 1)) {
       // Right Side
-      middleDx = middleDx - (t * _speed);
-      leftDy = leftDy - (t * _speed);
-      rightDy = rightDy + (t * _speed);
+      middleDx = middleDx - (t * ORB_EXPLODE_SPEED);
+      leftDy = leftDy - (t * ORB_EXPLODE_SPEED);
+      rightDy = rightDy + (t * ORB_EXPLODE_SPEED);
     } else {
-      middleDy = middleDy - (t * _speed);
-      leftDx = leftDx - (t * _speed);
-      rightDx = rightDx + (t * _speed);
-      bottomDy = bottomDy + (t * _speed);
+      middleDy = middleDy - (t * ORB_EXPLODE_SPEED);
+      leftDx = leftDx - (t * ORB_EXPLODE_SPEED);
+      rightDx = rightDx + (t * ORB_EXPLODE_SPEED);
+      bottomDy = bottomDy + (t * ORB_EXPLODE_SPEED);
     }
   }
 
   @override
   void render(Canvas canvas) {
-    cellModel.orbs.sort((a, b) => b - a);
-    if (cellModel.orbs.length > 0) {
-      cellModel.orbs.forEach((index) {
+    if (orbs > 0) {
+      for (int index = orbs; index > 0; --index) {
         if (index == 1 && middleDx > 0 && middleDy > 0) {
           _drawOrb(canvas, middleDx, middleDy);
         }
@@ -162,13 +168,13 @@ class Orbs extends PositionComponent with HasGameRef<ChainReactionGame> {
         if (index == 4 && bottomDx > 0 && bottomDy > 0) {
           _drawOrb(canvas, bottomDx, bottomDy);
         }
-      });
+      }
     }
   }
 
   @override
   void update(double t) {
-    if (cellModel.orbs.length > 0 && cellModel.isExplode) {
+    if (orbs > 0 && cellInfo.isExplode) {
       explodeOrbsPositions(t);
     } else {
       setOrbsPositions();
@@ -181,7 +187,7 @@ class Orbs extends PositionComponent with HasGameRef<ChainReactionGame> {
       radius: 10.0,
     );
 
-    Color playerColor = gameService.getPlayerColor(cellModel.player);
+    Color playerColor = gameService.getPlayerColor(cellInfo.player);
 
     var _gradient = LinearGradient(
       begin: Alignment.topLeft,

@@ -1,19 +1,27 @@
-class CellModel {
-  int i;
-  int j;
-  List orbs;
+class Position {
+  int i, j;
+
+  Position(this.i, this.j);
+
+  Position copyWith(int i, int j) {
+    return new Position(i ?? this.i, j ?? this.j);
+  }
+
+  @override
+  String toString() => 'Position($i, $j)';
+}
+
+class CellInfo {
   String player;
   bool isExplode;
 
-  CellModel(
-      {this.i, this.j, this.orbs, this.player = '', this.isExplode = false});
+  CellInfo({this.player = '', this.isExplode = false});
+
+  CellInfo copyWith({String player, bool isExplode}) {
+    return new CellInfo(
+        player: player ?? this.player, isExplode: isExplode ?? this.isExplode);
+  }
 
   @override
-  String toString() => 'CellModel{'
-      'i: $i, '
-      'j: $j, '
-      'orbs: $orbs, '
-      'player: $player, '
-      'isExplode: $isExplode'
-      '}';
+  String toString() => 'CellInfo{player: $player, isExplode: $isExplode}';
 }

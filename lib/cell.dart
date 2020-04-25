@@ -6,26 +6,30 @@ import 'package:flutter_flame_demo/game_service.dart';
 
 class Cell extends PositionComponent with Tapable {
   GameService service;
-  CellModel cellModel;
   Rect boxRect;
   Paint _boxPaint;
   Paint _tappedPaint;
   bool _beenTapped = false;
+  Position pos;
+  dynamic positionData;
 
   Cell(
       {double x = 0,
       double y = 0,
       double width = 60,
       double height = 60,
-      CellModel cellModel}) {
+      Position pos,
+      dynamic positionData}) {
+    this.service = gameService;
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
-    this.service = gameService;
-    this.cellModel = cellModel;
+    this.pos = pos;
+    this.positionData = positionData;
 
     boxRect = Rect.fromLTWH(this.x, this.y, this.width, this.height);
+
     _tappedPaint = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = 1
@@ -52,11 +56,12 @@ class Cell extends PositionComponent with Tapable {
 
   @override
   void onTapDown(TapDownDetails details) {
-    if (cellModel.orbs.length < 4 &&
-        (cellModel.player == service.playerTurn || cellModel.player == '') &&
-        !service.isChainReaction) {
+    int orbs = positionData[0];
+    CellInfo cellInfo = positionData[1];
+    if (orbs <= 3 &&
+        (cellInfo.player == service.playerTurn || cellInfo.player == '')) {
       _beenTapped = true;
-      this.service.playMove(cellModel.i, cellModel.j);
+      this.service.playMove(pos, service.playerTurn);
     }
   }
 
