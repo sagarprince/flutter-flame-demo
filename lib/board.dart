@@ -63,13 +63,6 @@ class Board {
     return _matrix;
   }
 
-  setMoveBlank(List<List<dynamic>> matrix, Position pos) {
-    List<List<dynamic>> _matrix = deepCopy(matrix);
-    _matrix[pos.i][pos.j][0] = 0;
-    _matrix[pos.i][pos.j][1] = CellInfo();
-    return _matrix;
-  }
-
   List shuffleUnstableList(items) {
     var random = new Random();
     // Go through all elements.
@@ -95,6 +88,24 @@ class Board {
     return _matrix;
   }
 
+  List<int> checkScores(List<List<dynamic>> matrix, List<dynamic> players) {
+    List<int> playersScores = new List.generate(players.length, (_) => 0);
+    int total = rows * cols;
+    for (int k = 0; k < total; k++) {
+      int i = k ~/ cols;
+      int j = k % cols;
+      int orbs = matrix[i][j][0];
+      CellInfo info = matrix[i][j][1];
+      if (info.player != '' && orbs > 0) {
+        int pIndex = players.indexOf(info.player);
+        if (pIndex > -1) {
+          playersScores[pIndex]++;
+        }
+      }
+    }
+    return playersScores;
+  }
+
   List<List<dynamic>> reset(List<List<dynamic>> matrix) {
     List<List<dynamic>> _matrix = deepCopy(matrix);
     int total = rows * cols;
@@ -109,5 +120,18 @@ class Board {
 
   List<List<dynamic>> deepCopy(List<List<dynamic>> matrix) {
     return []..addAll(matrix);
+  }
+
+  List<List<dynamic>> deepClone(List<List<dynamic>> matrix) {
+    List<List<dynamic>> _matrix = buildMatrix();
+    int total = rows * cols;
+    for (int k = 0; k < total; k++) {
+      int i = k ~/ cols;
+      int j = k % cols;
+      CellInfo info = matrix[i][j][1];
+      _matrix[i][j][0] = matrix[i][j][0];
+      _matrix[i][j][1] = info.copyWith();
+    }
+    return _matrix;
   }
 }
