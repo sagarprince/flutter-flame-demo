@@ -28,6 +28,8 @@ class GameService with ChangeNotifier {
   dynamic _winner;
   dynamic get winner => _winner;
 
+  int _complexityLimit = 18;
+
   GameService() {
     _board = Board(rows, cols);
     _matrix = _board.buildMatrix();
@@ -75,7 +77,7 @@ class GameService with ChangeNotifier {
             _playerTurn = _winner;
             notifyListeners();
           }
-          if (unstable.length > 18) {
+          if (unstable.length > _complexityLimit) {
             if (winner != null) {
               _matrix = _board.stopOnComplexReactions(_matrix);
               unstable = [];
@@ -105,8 +107,8 @@ class GameService with ChangeNotifier {
       var positionData = _matrix[_pos.i][_pos.j][1];
       positionData.isExplode = true;
       Flame.audio.play('pop.mp3');
-      await new Future.delayed(
-          Duration(milliseconds: unstable.length > 16 ? 100 : 200));
+      await new Future.delayed(Duration(
+          milliseconds: unstable.length > (_complexityLimit - 2) ? 100 : 200));
       _matrix[_pos.i][_pos.j][0] -= _board.criticalMass(_pos);
       List<dynamic> neighbours = _board.getNeighbours(_pos);
       neighbours.forEach((n) {
