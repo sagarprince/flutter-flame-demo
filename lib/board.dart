@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'dart:math';
 import 'package:flutter_flame_demo/models.dart';
 
 class Board {
@@ -68,6 +68,18 @@ class Board {
     _matrix[pos.i][pos.j][0] = 0;
     _matrix[pos.i][pos.j][1] = CellInfo();
     return _matrix;
+  }
+
+  List shuffleUnstableList(items) {
+    var random = new Random();
+    // Go through all elements.
+    for (var i = items.length - 1; i > 0; i--) {
+      var n = random.nextInt(i + 1);
+      var temp = items[i];
+      items[i] = items[n];
+      items[n] = temp;
+    }
+    return items;
   }
 
   stopOnComplexReactions(List<List<dynamic>> matrix) {

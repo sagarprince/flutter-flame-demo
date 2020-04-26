@@ -1,13 +1,11 @@
 import 'dart:async';
-import 'dart:math';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/board.dart';
 
-List<String> players = ['red', 'green'];
+List<String> players = ['red', 'green', 'blue'];
 
 class GameService with ChangeNotifier {
   int rows = 9;
@@ -21,7 +19,7 @@ class GameService with ChangeNotifier {
   String _playerTurn = players[0];
   String get playerTurn => _playerTurn;
 
-  int _pTurnIndex = 0;
+  int _pTurnIndex = 2;
   int _totalMoves = 0;
 
   bool _isChainReaction = false;
@@ -29,8 +27,6 @@ class GameService with ChangeNotifier {
 
   dynamic _winner;
   dynamic get winner => _winner;
-
-  int lastUnstableCount = 0;
 
   GameService() {
     _board = Board(rows, cols);
@@ -78,10 +74,14 @@ class GameService with ChangeNotifier {
             _playerTurn = _winner;
             notifyListeners();
           }
-          if (winner != null && unstable.length > 18) {
-            _matrix = _board.stopOnComplexReactions(_matrix);
-            unstable = [];
-            break;
+          if (unstable.length > 18) {
+            if (winner != null) {
+              _matrix = _board.stopOnComplexReactions(_matrix);
+              unstable = [];
+            } else {
+              // shuffle unstable list
+              unstable = _board.shuffleUnstableList(unstable);
+            }
           }
         }
 
