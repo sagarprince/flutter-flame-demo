@@ -40,10 +40,10 @@ class Board {
 
   List<dynamic> getNeighbours(Position pos) {
     var sides = [
-      [pos.i - 1, pos.j],
       [pos.i, pos.j + 1],
+      [pos.i, pos.j - 1],
       [pos.i + 1, pos.j],
-      [pos.i, pos.j - 1]
+      [pos.i - 1, pos.j]
     ];
     List<dynamic> neighbours = [];
     sides.forEach((n) {
@@ -67,6 +67,19 @@ class Board {
     List<List<dynamic>> _matrix = deepCopy(matrix);
     _matrix[pos.i][pos.j][0] = 0;
     _matrix[pos.i][pos.j][1] = CellInfo();
+    return _matrix;
+  }
+
+  stopOnComplexReactions(List<List<dynamic>> matrix) {
+    List<List<dynamic>> _matrix = deepCopy(matrix);
+    int total = rows * cols;
+    for (int k = 0; k < total; k++) {
+      int i = k ~/ cols;
+      int j = k % cols;
+      if (_matrix[i][j][0] >= criticalMass(Position(i, j))) {
+        _matrix[i][j][0] = criticalMass(Position(i, j)) - 1;
+      }
+    }
     return _matrix;
   }
 

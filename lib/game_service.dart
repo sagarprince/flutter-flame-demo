@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flame/flame.dart';
@@ -22,25 +23,19 @@ class GameService with ChangeNotifier {
 
   int _pTurnIndex = 0;
   int _totalMoves = 0;
-  bool _isSoundPlaying = false;
 
   bool _isChainReaction = false;
   bool get isChainReaction => _isChainReaction;
 
   dynamic _winner;
   dynamic get winner => _winner;
-  Timer _winnerTimer;
+
+  int lastUnstableCount = 0;
 
   GameService() {
     _board = Board(rows, cols);
     _matrix = _board.buildMatrix();
-    startCheckingWinner();
-  }
-
-  void startCheckingWinner() {
-    _winnerTimer = Timer.periodic(Duration(milliseconds: 1000), (_) {
-      checkWinner();
-    });
+//    testingData();
   }
 
   void setNextPlayer() {
@@ -51,8 +46,7 @@ class GameService with ChangeNotifier {
   void makeMove(Position pos, String player) {
     _matrix = _board.move(_matrix, pos, player);
     if (_winner == null) {
-      checkChainReaction(pos, player);
-      setNextPlayer();
+      checkChainReactions(pos, player);
     }
   }
 
@@ -61,70 +55,95 @@ class GameService with ChangeNotifier {
     _totalMoves++;
   }
 
-  void checkChainReaction(Position pos, String player) {
-    var positionData = _matrix[pos.i][pos.j];
-    int orbs = positionData[0];
-    if (orbs == _board.criticalMass(pos)) {
-      explode(pos, player);
-    }
-  }
-
-  void explode(Position pos, String player) {
-    Future.microtask(() {
-      List<dynamic> neighbours = _board.getNeighbours(pos);
-      _matrix[pos.i][pos.j][1].isExplode = true;
-      _isChainReaction = true;
-      Future.delayed(new Duration(milliseconds: 100), () {
-        if (!_isSoundPlaying) {
-          _isSoundPlaying = true;
-          Flame.audio.play('pop.mp3');
+  void checkChainReactions(Position pos, String player) async {
+    Future.microtask(() async {
+      while (true) {
+        List<dynamic> unstable = [];
+        int total = rows * cols;
+        for (int k = 0; k < total; k++) {
+          int i = k ~/ cols;
+          int j = k % cols;
+          Position _pos = Position(i, j);
+          int orbs = _matrix[i][j][0];
+          if (orbs >= _board.criticalMass(_pos)) {
+            unstable.add(_pos);
+          }
         }
-        Future.delayed(new Duration(milliseconds: 200), () {
-          neighbours.forEach((n) {
-            makeMove(n, player);
-          });
-          _matrix = _board.setMoveBlank(_matrix, pos);
-          _isChainReaction = false;
-          _isSoundPlaying = false;
-        });
-      });
+
+        // Check for winner also if unstable cells gets complex exit with winner
+        if (unstable.length > 0) {
+          String winner = getWinner();
+          if (winner != null) {
+            _winner = winner;
+            _playerTurn = _winner;
+            notifyListeners();
+          }
+          if (winner != null && unstable.length > 18) {
+            _matrix = _board.stopOnComplexReactions(_matrix);
+            unstable = [];
+            break;
+          }
+        }
+
+        // If there are no unstable pos then exit
+        if (unstable.length == 0) {
+          break;
+        }
+
+        await explode(unstable);
+      }
+
+      if (_winner == null) {
+        setNextPlayer();
+      }
     });
   }
 
-  void checkWinner() {
-    if (_winner == null) {
-      Future.microtask(() {
-        Future.delayed(Duration(milliseconds: 200), () {
-          if (_totalMoves >= players.length) {
-            Map<String, int> filledCells = {};
-            int total = rows * cols;
-            for (int k = 0; k < total; k++) {
-              int i = k ~/ cols; // determines i
-              int j = k % cols; // determines j
-              int orbs = _matrix[i][j][0];
-              CellInfo info = _matrix[i][j][1];
-              if (info.player != '' && orbs > 0) {
-                if (filledCells[info.player] != null) {
-                  filledCells[info.player]++;
-                } else {
-                  filledCells[info.player] = 1;
-                }
-              }
-            }
-
-            var filtered = Map.of(filledCells)..removeWhere((k, v) => v == 0);
-            var filteredList = filtered.keys.toList();
-            if (filteredList.length == 1) {
-              _winner = filteredList[0];
-              _playerTurn = _winner;
-              print(_winner);
-              notifyListeners();
-              _winnerTimer.cancel();
-            }
-          }
-        });
+  Future<dynamic> explode(List<dynamic> unstable) async {
+    return await Future.forEach(unstable, (_pos) async {
+      var positionData = _matrix[_pos.i][_pos.j][1];
+      positionData.isExplode = true;
+      Flame.audio.play('pop.mp3');
+      await new Future.delayed(
+          Duration(milliseconds: unstable.length > 16 ? 100 : 200));
+      _matrix[_pos.i][_pos.j][0] -= _board.criticalMass(_pos);
+      List<dynamic> neighbours = _board.getNeighbours(_pos);
+      neighbours.forEach((n) {
+        _matrix = _board.move(_matrix, n, positionData.player);
       });
+      // check for remaining orbs and then apply player
+      int orbs = _matrix[_pos.i][_pos.j][0];
+      positionData.player = orbs > 0 ? positionData.player : '';
+      positionData.isExplode = false;
+    });
+  }
+
+  dynamic getWinner() {
+    dynamic winner;
+    if (_totalMoves >= players.length) {
+      Map<String, int> filledCells = {};
+      int total = rows * cols;
+      for (int k = 0; k < total; k++) {
+        int i = k ~/ cols; // determines i
+        int j = k % cols; // determines j
+        int orbs = _matrix[i][j][0];
+        CellInfo info = _matrix[i][j][1];
+        if (info.player != '' && orbs > 0) {
+          if (filledCells[info.player] != null) {
+            filledCells[info.player]++;
+          } else {
+            filledCells[info.player] = 1;
+          }
+        }
+      }
+
+      var filtered = Map.of(filledCells)..removeWhere((k, v) => v == 0);
+      var filteredList = filtered.keys.toList();
+      if (filteredList.length == 1) {
+        winner = filteredList[0];
+      }
     }
+    return winner;
   }
 
   void reset() {
@@ -133,7 +152,6 @@ class GameService with ChangeNotifier {
     _playerTurn = players[_pTurnIndex];
     _totalMoves = 0;
     _winner = null;
-    startCheckingWinner();
     notifyListeners();
   }
 
@@ -153,6 +171,39 @@ class GameService with ChangeNotifier {
         break;
       default:
         return Colors.red;
+    }
+  }
+
+  // Testing
+  void testingData() {
+    int total = rows * cols;
+    for (int k = 0; k < total; k++) {
+      int i = k ~/ cols; // determines i
+      int j = k % cols; // determines j
+
+      _pTurnIndex = (players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
+      _playerTurn = players[_pTurnIndex];
+      _totalMoves++;
+      _matrix[i][j][1] = CellInfo(player: _playerTurn);
+
+      // Corner Cells
+      if (((i == 0 && j == 0 ||
+          i == 0 && j == (cols - 1) ||
+          i == (rows - 1) && j == 0 ||
+          i == (rows - 1) && j == (cols - 1)))) {
+        _matrix[i][j][0] = 1;
+      }
+
+      // Vertical/Horizontal Side Cells
+      else if (((i > 0 && i < (rows - 1) && (j == 0 || j == (cols - 1))) ||
+          (j > 0 && j < (cols - 1) && (i == 0 || i == (rows - 1))))) {
+        _matrix[i][j][0] = 2;
+      }
+
+      // Middle Cells
+      else {
+        _matrix[i][j][0] = 3;
+      }
     }
   }
 }
