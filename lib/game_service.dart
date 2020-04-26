@@ -5,7 +5,7 @@ import 'package:flame/flame.dart';
 import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/board.dart';
 
-List<String> players = ['red', 'green', 'blue'];
+List<String> players = ['red', 'green'];
 
 class GameService with ChangeNotifier {
   int rows = 9;
@@ -19,7 +19,7 @@ class GameService with ChangeNotifier {
   String _playerTurn = players[0];
   String get playerTurn => _playerTurn;
 
-  int _pTurnIndex = 2;
+  int _pTurnIndex = 0;
   int _totalMoves = 0;
 
   bool _isChainReaction = false;
@@ -54,6 +54,7 @@ class GameService with ChangeNotifier {
   void checkChainReactions(Position pos, String player) async {
     Future.microtask(() async {
       while (true) {
+        _isChainReaction = true;
         List<dynamic> unstable = [];
         int total = rows * cols;
         for (int k = 0; k < total; k++) {
@@ -92,7 +93,7 @@ class GameService with ChangeNotifier {
 
         await explode(unstable);
       }
-
+      _isChainReaction = false;
       if (_winner == null) {
         setNextPlayer();
       }
