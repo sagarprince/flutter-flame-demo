@@ -5,7 +5,7 @@ import 'package:flame/flame.dart';
 import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/board.dart';
 
-List<String> players = ['red', 'green'];
+List<dynamic> allPlayers = ['red', 'green'];
 
 class GameService with ChangeNotifier {
   int rows = 9;
@@ -13,10 +13,12 @@ class GameService with ChangeNotifier {
 
   Board _board;
 
+  List<dynamic> _players = List.from(allPlayers).toList(growable: true);
+
   List<List<dynamic>> _matrix = [];
   List<List<dynamic>> get matrix => _matrix;
 
-  String _playerTurn = players[0];
+  String _playerTurn = allPlayers[0];
   String get playerTurn => _playerTurn;
 
   int _pTurnIndex = 0;
@@ -28,6 +30,8 @@ class GameService with ChangeNotifier {
   dynamic _winner;
   dynamic get winner => _winner;
 
+  int _complexityLimit = 18;
+
   GameService() {
     _board = Board(rows, cols);
     _matrix = _board.buildMatrix();
@@ -35,8 +39,12 @@ class GameService with ChangeNotifier {
   }
 
   void setNextPlayer() {
-    _pTurnIndex = (players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
-    _playerTurn = players[_pTurnIndex];
+    if (_pTurnIndex < _players.length - 1) {
+      _pTurnIndex++;
+    } else {
+      _pTurnIndex = 0;
+    }
+    _playerTurn = _players[_pTurnIndex];
   }
 
   void makeMove(Position pos, String player) {
@@ -67,16 +75,14 @@ class GameService with ChangeNotifier {
           }
         }
 
-        // Check for winner also if unstable cells gets complex exit with winner
+        // Evaluate winner
+        _winner = evaluateWinner();
+
+        // If unstable cells gets complex exit with winner
         if (unstable.length > 0) {
-          String winner = getWinner();
-          if (winner != null) {
-            _winner = winner;
-            _playerTurn = _winner;
-            notifyListeners();
-          }
-          if (unstable.length > 18) {
-            if (winner != null) {
+          setWinner();
+          if (unstable.length > _complexityLimit) {
+            if (_winner != null) {
               _matrix = _board.stopOnComplexReactions(_matrix);
               unstable = [];
             } else {
@@ -94,6 +100,9 @@ class GameService with ChangeNotifier {
         await explode(unstable);
       }
       _isChainReaction = false;
+      // Evaluate Winner when Exit From While Loop
+      _winner = evaluateWinner();
+      setWinner();
       if (_winner == null) {
         setNextPlayer();
       }
@@ -104,9 +113,9 @@ class GameService with ChangeNotifier {
     return await Future.forEach(unstable, (_pos) async {
       var positionData = _matrix[_pos.i][_pos.j][1];
       positionData.isExplode = true;
-      Flame.audio.play('pop.mp3');
-      await new Future.delayed(
-          Duration(milliseconds: unstable.length > 16 ? 100 : 200));
+//      await Flame.audio.play('pop.mp3');
+      await new Future.delayed(Duration(
+          milliseconds: unstable.length > (_complexityLimit - 2) ? 100 : 200));
       _matrix[_pos.i][_pos.j][0] -= _board.criticalMass(_pos);
       List<dynamic> neighbours = _board.getNeighbours(_pos);
       neighbours.forEach((n) {
@@ -119,38 +128,58 @@ class GameService with ChangeNotifier {
     });
   }
 
-  dynamic getWinner() {
+  dynamic evaluateWinner() {
     dynamic winner;
-    if (_totalMoves >= players.length) {
-      Map<String, int> filledCells = {};
-      int total = rows * cols;
-      for (int k = 0; k < total; k++) {
-        int i = k ~/ cols; // determines i
-        int j = k % cols; // determines j
-        int orbs = _matrix[i][j][0];
-        CellInfo info = _matrix[i][j][1];
-        if (info.player != '' && orbs > 0) {
-          if (filledCells[info.player] != null) {
-            filledCells[info.player]++;
-          } else {
-            filledCells[info.player] = 1;
-          }
+    if (_totalMoves >= _players.length) {
+      List<int> playersScores = _board.checkScores(_matrix, _players);
+      int k = 0;
+      dynamic player;
+      List<dynamic> removedList = [];
+
+      playersScores.forEach((sc) {
+        if (sc == 0) {
+          removedList.add(_players[k]);
         }
+        k++;
+      });
+
+      if (removedList.length > 0) {
+        player =
+            _pTurnIndex <= (_players.length - 1) ? _players[_pTurnIndex] : null;
+        removedList.forEach((v) {
+          _players.remove(v);
+        });
       }
 
-      var filtered = Map.of(filledCells)..removeWhere((k, v) => v == 0);
-      var filteredList = filtered.keys.toList();
-      if (filteredList.length == 1) {
-        winner = filteredList[0];
+      if (player != null) {
+        _pTurnIndex =
+            _players.indexOf(player) > -1 ? _players.indexOf(player) : 0;
+      }
+
+      print('=======================');
+      print(_players);
+      print('TURN INDEX : $_pTurnIndex, $player');
+      print(playersScores);
+
+      if (_players.length == 1) {
+        winner = _players[0];
       }
     }
     return winner;
   }
 
+  void setWinner() {
+    if (_winner != null) {
+      _playerTurn = _winner;
+      notifyListeners();
+    }
+  }
+
   void reset() {
     _matrix = _board.reset(_matrix);
+    _players = List.from(allPlayers).toList(growable: true);
     _pTurnIndex = 0;
-    _playerTurn = players[_pTurnIndex];
+    _playerTurn = _players[_pTurnIndex];
     _totalMoves = 0;
     _winner = null;
     notifyListeners();
@@ -182,8 +211,9 @@ class GameService with ChangeNotifier {
       int i = k ~/ cols; // determines i
       int j = k % cols; // determines j
 
-      _pTurnIndex = (players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
-      _playerTurn = players[_pTurnIndex];
+      _pTurnIndex =
+          (_players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
+      _playerTurn = _players[_pTurnIndex];
       _totalMoves++;
       _matrix[i][j][1] = CellInfo(player: _playerTurn);
 
