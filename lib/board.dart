@@ -67,7 +67,6 @@ class Board {
   }
 
   botMove(List<List<dynamic>> matrix, String player) {
-    print(player);
     return bot.play(matrix, player);
   }
 

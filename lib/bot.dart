@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/board.dart';
 
@@ -15,34 +16,35 @@ class Bot {
   Position play(List<List<dynamic>> matrix, dynamic player) {
     List<List<dynamic>> _matrix = deepClone(matrix);
     Position bestMove = miniMax(_matrix, player)[0];
-    print(bestMove);
+    print('Bot Move $bestMove');
     return bestMove;
   }
 
   miniMax(List<List<dynamic>> matrix, player,
       [int depth = 3, int breadth = 5]) {
-    Position bestPos;
-    int bestScore;
+//    print('depth $depth');
     dynamic bestMoves = bestN(matrix, player, breadth);
-    bestPos = (bestMoves[0] as MapEntry).key;
-    bestScore = score(reactions(matrix, bestPos, player), player);
-    if (depth > 1) {
-      bestMoves.forEach((bm) {
-        List<List<dynamic>> bMatrix =
-            reactions(matrix, (bm as MapEntry).key, player);
-        int score = miniMax(bMatrix, player, depth = depth - 1)[1];
-        if (score > bestScore) {
-          bestScore = score;
-          bestPos = (bm as MapEntry).key;
-        }
-      });
+    Position bestPos = bestMoves[0];
+    int bestScore = score(reactions(matrix, bestPos, player), player);
+    if (depth == 1) {
+      return [bestPos, bestScore];
     }
-    print(bestMoves);
+//    dynamic _bestMoves = bestN(matrix, player);
+//    print('bestMovesB $_bestMoves');
+//    _bestMoves.forEach((bmPos) {
+//      List<List<dynamic>> bMatrix = reactions(matrix, bmPos, player);
+//      depth = depth - 1;
+//      int score = miniMax(bMatrix, player, depth)[1];
+//      if (score > bestScore) {
+//        bestScore = score;
+//        bestPos = bmPos;
+//      }
+//    });
     return [bestPos, bestScore];
   }
 
   bestN(List<List<dynamic>> matrix, dynamic player, [int n = 10]) {
-    Map<Position, int> conf = Map();
+    HashMap<Position, int> conf = HashMap();
     int total = rows * cols;
     for (int k = 0; k < total; k++) {
       int i = k ~/ cols;
@@ -50,23 +52,18 @@ class Bot {
       Position pos = Position(i, j);
       CellInfo info = matrix[pos.i][pos.j][1];
       if (info.player == player || info.player == '') {
-        conf[pos] = score(
-            reactions(matrix, pos, player), player); // conf[Position(2, 3] = 10
+        conf[pos] = score(reactions(matrix, pos, player), player);
         // Return just the winning position in case you find one
         if (conf[pos] == 10000) {
           return [pos];
         }
       }
     }
+
     // Sort by higher score
-    List<dynamic> sortedList = conf.entries.toList()
-      ..sort((a, b) => b.value - a.value);
-    // Take only n from list
-    List<dynamic> confList = [];
-    for (int index = 0; index < n; index++) {
-      confList.add(sortedList[index]);
-    }
-    return confList;
+    Map<Position, int> sorted = Map.fromEntries(
+        conf.entries.toList()..sort((a, b) => b.value.compareTo(a.value)));
+    return sorted.keys.toList().take(n).toList();
   }
 
   int score(List<List<dynamic>> matrix, dynamic player) {
@@ -79,27 +76,28 @@ class Bot {
 
       if (matrix[i][j][1].player == player) {
         myOrbs += matrix[i][j][0];
-        bool isVulnerable = false;
+        bool isNotVulnerable = true;
         Position pos = Position(i, j);
         List<dynamic> neighbours = board.getNeighbours(pos);
         neighbours.forEach((nPos) {
           CellInfo nInfo = matrix[nPos.i][nPos.j][1];
-          if (nInfo.player != player) {
-            sc -= 5 - board.criticalMass(nPos);
-            isVulnerable = true;
+          if (nInfo.player != player &&
+              matrix[nPos.i][nPos.j][0] == (board.criticalMass(nPos) - 1)) {
+            sc -= 5 - board.criticalMass(pos);
+            isNotVulnerable = false;
           }
         });
-        if (!isVulnerable) {
+        if (isNotVulnerable) {
           // The Side Vertical/Horizontal Heuristic
           if (board.criticalMass(pos) == 3) {
             sc += 2;
           }
           // The Corner Heuristic
-          if (board.criticalMass(pos) == 2) {
+          else if (board.criticalMass(pos) == 2) {
             sc += 3;
           }
           // The Unstability Heuristic
-          if ((board.criticalMass(pos) - 1) == 2) {
+          if (matrix[i][j][0] == (board.criticalMass(pos) - 1)) {
             sc += 2;
           }
         }
@@ -129,7 +127,8 @@ class Bot {
 
   List<List<dynamic>> reactions(
       List<List<dynamic>> matrix, Position pos, String player) {
-    matrix = move(matrix, pos, player);
+    List<List<dynamic>> _matrix = deepClone(matrix);
+    _matrix = move(_matrix, pos, player);
     int t1 = new DateTime.now().second;
     while (true) {
       List<dynamic> unstable = [];
@@ -138,7 +137,7 @@ class Bot {
         int i = k ~/ cols;
         int j = k % cols;
         Position _pos = Position(i, j);
-        int orbs = matrix[i][j][0];
+        int orbs = _matrix[i][j][0];
         if (orbs >= board.criticalMass(_pos)) {
           unstable.add(_pos);
         }
@@ -154,17 +153,17 @@ class Bot {
       }
 
       unstable.forEach((uPos) {
-        var positionData = matrix[uPos.i][uPos.j][1];
-        matrix[uPos.i][uPos.j][0] -= board.criticalMass(uPos);
+        var positionData = _matrix[uPos.i][uPos.j][1];
+        _matrix[uPos.i][uPos.j][0] -= board.criticalMass(uPos);
         List<dynamic> neighbours = board.getNeighbours(uPos);
         neighbours.forEach((nPos) {
-          matrix = board.move(matrix, nPos, positionData.player);
+          _matrix = move(_matrix, nPos, positionData.player);
         });
-        int orbs = matrix[uPos.i][uPos.j][0];
+        int orbs = _matrix[uPos.i][uPos.j][0];
         positionData.player = orbs > 0 ? positionData.player : '';
       });
     }
-    return matrix;
+    return _matrix;
   }
 
   List<List<dynamic>> move(

@@ -63,13 +63,15 @@ class GameService with ChangeNotifier {
     if (_playerTurn == 'green') {
       await Future.delayed(Duration(milliseconds: 600));
       Position bestPos = _board.botMove(_matrix, _playerTurn);
-      playMove(bestPos, _playerTurn);
+      if (bestPos != null) {
+        playMove(bestPos, _playerTurn);
+      }
     }
   }
 
   void checkChainReactions(Position pos, String player) async {
     Future.microtask(() async {
-      while (true) {
+      while (_winner == null) {
         _isChainReaction = true;
         List<dynamic> unstable = [];
         int total = rows * cols;
@@ -119,6 +121,7 @@ class GameService with ChangeNotifier {
   }
 
   Future<dynamic> explode(List<dynamic> unstable) async {
+    print('unstable length ${unstable.length}');
     return await Future.forEach(unstable, (_pos) async {
       var positionData = _matrix[_pos.i][_pos.j][1];
       positionData.isExplode = true;

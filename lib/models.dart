@@ -8,6 +8,14 @@ class Position {
   }
 
   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Position && i == other.i && j == other.j;
+
+  @override
+  int get hashCode => i.hashCode ^ j.hashCode;
+
+  @override
   String toString() => 'Position($i, $j)';
 }
 
