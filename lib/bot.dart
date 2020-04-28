@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:async';
 import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/board.dart';
 
@@ -13,34 +14,26 @@ class Bot {
     this.cols = this.board.cols;
   }
 
-  Position play(List<List<dynamic>> matrix, dynamic player) {
+  Future<Position> play(List<List<dynamic>> matrix, dynamic player) async {
     List<List<dynamic>> _matrix = deepClone(matrix);
-    Position bestMove = miniMax(_matrix, player)[0];
-    print('Bot Move $bestMove');
-    return bestMove;
+    List<dynamic> calculatedMove = await miniMax(_matrix, player);
+    Position pos = calculatedMove[0];
+    print('Bot Move $pos');
+    return pos;
   }
 
-  miniMax(List<List<dynamic>> matrix, player,
+  Future<dynamic> miniMax(List<List<dynamic>> matrix, player,
       [int depth = 3, int breadth = 5]) {
-//    print('depth $depth');
-    dynamic bestMoves = bestN(matrix, player, breadth);
-    Position bestPos = bestMoves[0];
-    int bestScore = score(reactions(matrix, bestPos, player), player);
-    if (depth == 1) {
-      return [bestPos, bestScore];
-    }
-//    dynamic _bestMoves = bestN(matrix, player);
-//    print('bestMovesB $_bestMoves');
-//    _bestMoves.forEach((bmPos) {
-//      List<List<dynamic>> bMatrix = reactions(matrix, bmPos, player);
-//      depth = depth - 1;
-//      int score = miniMax(bMatrix, player, depth)[1];
-//      if (score > bestScore) {
-//        bestScore = score;
-//        bestPos = bmPos;
-//      }
-//    });
-    return [bestPos, bestScore];
+    Completer<dynamic> c = Completer();
+    Future.microtask(() {
+      Future.delayed(Duration(milliseconds: 700), () {
+        dynamic bestMoves = bestN(matrix, player, breadth);
+        Position bestPos = bestMoves[0];
+        int bestScore = score(reactions(matrix, bestPos, player), player);
+        c.complete([bestPos, bestScore]);
+      });
+    });
+    return c.future;
   }
 
   bestN(List<List<dynamic>> matrix, dynamic player, [int n = 10]) {

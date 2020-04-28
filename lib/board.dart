@@ -66,8 +66,8 @@ class Board {
     return _matrix;
   }
 
-  botMove(List<List<dynamic>> matrix, String player) {
-    return bot.play(matrix, player);
+  Future<Position> botMove(List<List<dynamic>> matrix, String player) async {
+    return await bot.play(matrix, player);
   }
 
   List shuffleUnstableList(items) {

@@ -60,9 +60,8 @@ class GameService with ChangeNotifier {
   }
 
   void botMove() async {
-    if (_playerTurn == 'green') {
-      await Future.delayed(Duration(milliseconds: 600));
-      Position bestPos = _board.botMove(_matrix, _playerTurn);
+    if (_playerTurn == 'green' || _playerTurn == 'blue') {
+      Position bestPos = await _board.botMove(_matrix, _playerTurn);
       if (bestPos != null) {
         playMove(bestPos, _playerTurn);
       }
@@ -121,11 +120,10 @@ class GameService with ChangeNotifier {
   }
 
   Future<dynamic> explode(List<dynamic> unstable) async {
-    print('unstable length ${unstable.length}');
     return await Future.forEach(unstable, (_pos) async {
       var positionData = _matrix[_pos.i][_pos.j][1];
       positionData.isExplode = true;
-      await Flame.audio.play('pop.mp3');
+//      await Flame.audio.play('pop.mp3');
       await new Future.delayed(Duration(
           milliseconds: unstable.length > (_complexityLimit - 2) ? 100 : 200));
       _matrix[_pos.i][_pos.j][0] -= _board.criticalMass(_pos);
