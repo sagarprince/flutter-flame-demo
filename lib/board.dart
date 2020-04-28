@@ -1,13 +1,16 @@
 import 'dart:math';
 import 'package:flutter_flame_demo/models.dart';
+import 'package:flutter_flame_demo/bot.dart';
 
 class Board {
   int rows = 0;
   int cols = 0;
+  Bot bot;
 
   Board([rows = 9, cols = 6]) {
     this.rows = rows;
     this.cols = cols;
+    this.bot = Bot(this);
   }
 
   List<List<dynamic>> buildMatrix() {
@@ -61,6 +64,11 @@ class Board {
     info.player = player;
     _matrix[pos.i][pos.j][1] = info;
     return _matrix;
+  }
+
+  botMove(List<List<dynamic>> matrix, String player) {
+    print(player);
+    return bot.play(matrix, player);
   }
 
   List shuffleUnstableList(items) {
@@ -120,18 +128,5 @@ class Board {
 
   List<List<dynamic>> deepCopy(List<List<dynamic>> matrix) {
     return []..addAll(matrix);
-  }
-
-  List<List<dynamic>> deepClone(List<List<dynamic>> matrix) {
-    List<List<dynamic>> _matrix = buildMatrix();
-    int total = rows * cols;
-    for (int k = 0; k < total; k++) {
-      int i = k ~/ cols;
-      int j = k % cols;
-      CellInfo info = matrix[i][j][1];
-      _matrix[i][j][0] = matrix[i][j][0];
-      _matrix[i][j][1] = info.copyWith();
-    }
-    return _matrix;
   }
 }

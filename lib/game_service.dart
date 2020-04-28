@@ -59,6 +59,14 @@ class GameService with ChangeNotifier {
     _totalMoves++;
   }
 
+  void botMove() async {
+    if (_playerTurn == 'green') {
+      await Future.delayed(Duration(milliseconds: 600));
+      Position bestPos = _board.botMove(_matrix, _playerTurn);
+      playMove(bestPos, _playerTurn);
+    }
+  }
+
   void checkChainReactions(Position pos, String player) async {
     Future.microtask(() async {
       while (true) {
@@ -105,6 +113,7 @@ class GameService with ChangeNotifier {
       setWinner();
       if (_winner == null) {
         setNextPlayer();
+        botMove();
       }
     });
   }
@@ -113,7 +122,7 @@ class GameService with ChangeNotifier {
     return await Future.forEach(unstable, (_pos) async {
       var positionData = _matrix[_pos.i][_pos.j][1];
       positionData.isExplode = true;
-//      await Flame.audio.play('pop.mp3');
+      await Flame.audio.play('pop.mp3');
       await new Future.delayed(Duration(
           milliseconds: unstable.length > (_complexityLimit - 2) ? 100 : 200));
       _matrix[_pos.i][_pos.j][0] -= _board.criticalMass(_pos);
@@ -155,11 +164,6 @@ class GameService with ChangeNotifier {
         _pTurnIndex =
             _players.indexOf(player) > -1 ? _players.indexOf(player) : 0;
       }
-
-      print('=======================');
-      print(_players);
-      print('TURN INDEX : $_pTurnIndex, $player');
-      print(playersScores);
 
       if (_players.length == 1) {
         winner = _players[0];
