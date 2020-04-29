@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:async';
+import 'dart:isolate';
 import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/board.dart';
 
@@ -14,26 +15,45 @@ class Bot {
     this.cols = this.board.cols;
   }
 
-  Future<Position> play(List<List<dynamic>> matrix, dynamic player) async {
-    List<List<dynamic>> _matrix = deepClone(matrix);
-    List<dynamic> calculatedMove = await miniMax(_matrix, player);
-    Position pos = calculatedMove[0];
-    print('Bot Move $pos');
-    return pos;
+  static computeBotMoveOnIsolate(SendPort sendPort) async {
+    ReceivePort receivePort = ReceivePort();
+    sendPort.send(receivePort.sendPort);
+    await for (var args in receivePort) {
+      Bot bot = args[0];
+      List<List<dynamic>> matrix = args[1];
+      dynamic player = args[2];
+      SendPort callbackPort = args[3];
+      List<List<dynamic>> _matrix = bot.deepClone(matrix);
+      List<dynamic> calculatedMove = bot.miniMax(_matrix, player);
+      callbackPort.send(calculatedMove);
+    }
   }
 
-  Future<dynamic> miniMax(List<List<dynamic>> matrix, player,
+  Future<Position> play(List<List<dynamic>> matrix, dynamic player) async {
+    ReceivePort receivePort = ReceivePort();
+    await Future.delayed(Duration(milliseconds: 100));
+    await Isolate.spawn(computeBotMoveOnIsolate, receivePort.sendPort);
+    // Get the listener port for the new isolate
+    SendPort sendPort = await receivePort.first;
+    dynamic result = await _sendReceive(sendPort, matrix, player);
+    return result[0];
+  }
+
+  // Create your own listening port and send a message to the new isolate
+  Future _sendReceive(
+      SendPort sendPort, List<List<dynamic>> matrix, dynamic player) {
+    ReceivePort receivePort = ReceivePort();
+    sendPort.send([this, matrix, player, receivePort.sendPort]);
+    // Receive the return value and return it to the caller
+    return receivePort.first;
+  }
+
+  List<dynamic> miniMax(List<List<dynamic>> matrix, player,
       [int depth = 3, int breadth = 5]) {
-    Completer<dynamic> c = Completer();
-    Future.microtask(() {
-      Future.delayed(Duration(milliseconds: 700), () {
-        dynamic bestMoves = bestN(matrix, player, breadth);
-        Position bestPos = bestMoves[0];
-        int bestScore = score(reactions(matrix, bestPos, player), player);
-        c.complete([bestPos, bestScore]);
-      });
-    });
-    return c.future;
+    dynamic bestMoves = bestN(matrix, player, breadth);
+    Position bestPos = bestMoves[0];
+    int bestScore = score(reactions(matrix, bestPos, player), player);
+    return [bestPos, bestScore];
   }
 
   bestN(List<List<dynamic>> matrix, dynamic player, [int n = 10]) {

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:isolate';
 import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/bot.dart';
 
@@ -82,7 +83,7 @@ class Board {
     return items;
   }
 
-  stopOnComplexReactions(List<List<dynamic>> matrix) {
+  setEquivalentOrbs(List<List<dynamic>> matrix) {
     List<List<dynamic>> _matrix = deepCopy(matrix);
     int total = rows * cols;
     for (int k = 0; k < total; k++) {

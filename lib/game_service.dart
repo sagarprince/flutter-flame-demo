@@ -35,7 +35,7 @@ class GameService with ChangeNotifier {
   GameService() {
     _board = Board(rows, cols);
     _matrix = _board.buildMatrix();
-//    testingData();
+    //testingData();
   }
 
   void setNextPlayer() {
@@ -92,7 +92,6 @@ class GameService with ChangeNotifier {
           setWinner();
           if (unstable.length > _complexityLimit) {
             if (_winner != null) {
-              _matrix = _board.stopOnComplexReactions(_matrix);
               unstable = [];
             } else {
               // shuffle unstable list
@@ -108,14 +107,7 @@ class GameService with ChangeNotifier {
 
         await explode(unstable);
       }
-      _isChainReaction = false;
-      // Evaluate Winner when Exit From While Loop
-      _winner = evaluateWinner();
-      setWinner();
-      if (_winner == null) {
-        setNextPlayer();
-        botMove();
-      }
+      onAfterChainReactions();
     });
   }
 
@@ -125,7 +117,7 @@ class GameService with ChangeNotifier {
       positionData.isExplode = true;
 //      await Flame.audio.play('pop.mp3');
       await new Future.delayed(Duration(
-          milliseconds: unstable.length > (_complexityLimit - 2) ? 100 : 200));
+          milliseconds: unstable.length > (_complexityLimit - 2) ? 100 : 220));
       _matrix[_pos.i][_pos.j][0] -= _board.criticalMass(_pos);
       List<dynamic> neighbours = _board.getNeighbours(_pos);
       neighbours.forEach((n) {
@@ -136,6 +128,17 @@ class GameService with ChangeNotifier {
       positionData.player = orbs > 0 ? positionData.player : '';
       positionData.isExplode = false;
     });
+  }
+
+  void onAfterChainReactions() {
+    _isChainReaction = false;
+    _winner = evaluateWinner();
+    if (winner == null) {
+      setNextPlayer();
+      botMove();
+    } else {
+      setWinner();
+    }
   }
 
   dynamic evaluateWinner() {
@@ -177,6 +180,7 @@ class GameService with ChangeNotifier {
     if (_winner != null) {
       _playerTurn = _winner;
       notifyListeners();
+      _matrix = _board.setEquivalentOrbs(_matrix);
     }
   }
 
