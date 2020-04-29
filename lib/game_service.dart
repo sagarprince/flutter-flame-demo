@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/board.dart';
+import 'package:threading/threading.dart';
 
 List<dynamic> allPlayers = ['red', 'green'];
 
@@ -35,7 +36,7 @@ class GameService with ChangeNotifier {
   GameService() {
     _board = Board(rows, cols);
     _matrix = _board.buildMatrix();
-    //testingData();
+    testingData();
   }
 
   void setNextPlayer() {
@@ -47,10 +48,15 @@ class GameService with ChangeNotifier {
     _playerTurn = _players[_pTurnIndex];
   }
 
-  void makeMove(Position pos, String player) {
+  void makeMove(Position pos, String player) async {
     _matrix = _board.move(_matrix, pos, player);
     if (_winner == null) {
-      checkChainReactions(pos, player);
+//      checkChainReactions(pos, player);
+      var thread = new Thread(() {
+        checkChainReactions(pos, player);
+      });
+      await thread.start();
+      await thread.join();
     }
   }
 
@@ -105,7 +111,11 @@ class GameService with ChangeNotifier {
           break;
         }
 
-        await explode(unstable);
+        var thread = Thread(() async {
+          await explode(unstable);
+        });
+        await thread.start();
+        await thread.join();
       }
       onAfterChainReactions();
     });
@@ -135,7 +145,7 @@ class GameService with ChangeNotifier {
     _winner = evaluateWinner();
     if (winner == null) {
       setNextPlayer();
-      botMove();
+//      botMove();
     } else {
       setWinner();
     }
