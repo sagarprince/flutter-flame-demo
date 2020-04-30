@@ -5,14 +5,14 @@ import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/board.dart';
 
 class Bot {
-  int rows = 9;
-  int cols = 6;
-  Board board;
+  int _rows = 9;
+  int _cols = 6;
+  Board _board;
 
   Bot(Board board) {
-    this.board = board;
-    this.rows = this.board.rows;
-    this.cols = this.board.cols;
+    this._board = board;
+    this._rows = this._board.rows;
+    this._cols = this._board.cols;
   }
 
   static computeBotMoveOnIsolate(SendPort sendPort) async {
@@ -23,19 +23,25 @@ class Bot {
       List<List<dynamic>> matrix = args[1];
       dynamic player = args[2];
       SendPort callbackPort = args[3];
-      List<List<dynamic>> _matrix = bot.deepClone(matrix);
-      List<dynamic> calculatedMove = bot.miniMax(_matrix, player);
+      List<List<dynamic>> _matrix = bot._deepClone(matrix);
+      List<dynamic> calculatedMove = bot._miniMax(_matrix, player);
       callbackPort.send(calculatedMove);
     }
   }
 
   Future<Position> play(List<List<dynamic>> matrix, dynamic player) async {
     ReceivePort receivePort = ReceivePort();
-    await Future.delayed(Duration(milliseconds: 100));
-    await Isolate.spawn(computeBotMoveOnIsolate, receivePort.sendPort);
+    await Future.delayed(Duration(milliseconds: 600));
+    Isolate isolate =
+        await Isolate.spawn(computeBotMoveOnIsolate, receivePort.sendPort);
     // Get the listener port for the new isolate
     SendPort sendPort = await receivePort.first;
     dynamic result = await _sendReceive(sendPort, matrix, player);
+    if (isolate != null) {
+      isolate.kill(priority: Isolate.immediate);
+      isolate = null;
+      receivePort.close();
+    }
     return result[0];
   }
 
@@ -48,27 +54,45 @@ class Bot {
     return receivePort.first;
   }
 
-  List<dynamic> miniMax(List<List<dynamic>> matrix, player,
-      [int depth = 3, int breadth = 5]) {
-    dynamic bestMoves = bestN(matrix, player, breadth);
-    Position bestPos = bestMoves[0];
-    int bestScore = score(reactions(matrix, bestPos, player), player);
-    return [bestPos, bestScore];
+  List<dynamic> _miniMax(List<List<dynamic>> matrix, player,
+      [int depth = 2, int breadth = 2]) {
+    List<dynamic> bestMoves = _bestN(matrix, player, breadth);
+    print(bestMoves);
+    Position bestMovePos = bestMoves[0][0];
+    int bestMoveScore = bestMoves[1][0];
+    if (depth == 1) {
+      return [bestMovePos, bestMoveScore];
+    }
+    List<dynamic> _bestMoves = _bestN(matrix, player, breadth);
+    for (int k = 0; k < _bestMoves[0].length; k++) {
+      Position _pos = _bestMoves[0][k];
+      List<List<dynamic>> bMatrix = _reactions(matrix, _pos, player);
+      int score = _miniMax(bMatrix, player, depth - 1)[1];
+      if (score > bestMoveScore) {
+        bestMoveScore = score;
+        bestMovePos = _pos;
+      }
+    }
+    return [bestMovePos, bestMoveScore];
   }
 
-  bestN(List<List<dynamic>> matrix, dynamic player, [int n = 10]) {
+  _bestN(List<List<dynamic>> matrix, dynamic player, [int n = 10]) {
     HashMap<Position, int> conf = HashMap();
-    int total = rows * cols;
+    int total = _rows * _cols;
     for (int k = 0; k < total; k++) {
-      int i = k ~/ cols;
-      int j = k % cols;
+      int i = k ~/ _cols;
+      int j = k % _cols;
       Position pos = Position(i, j);
       CellInfo info = matrix[pos.i][pos.j][1];
       if (info.player == player || info.player == '') {
-        conf[pos] = score(reactions(matrix, pos, player), player);
+        conf[pos] = _score(_reactions(matrix, pos, player), player);
         // Return just the winning position in case you find one
         if (conf[pos] == 10000) {
-          return [pos];
+          print('Winning Pos $pos');
+          return [
+            [pos],
+            [10000]
+          ];
         }
       }
     }
@@ -76,41 +100,43 @@ class Bot {
     // Sort by higher score
     Map<Position, int> sorted = Map.fromEntries(
         conf.entries.toList()..sort((a, b) => b.value.compareTo(a.value)));
-    return sorted.keys.toList().take(n).toList();
+    var positions = sorted.keys.toList().take(n).toList();
+    var scores = sorted.values.toList().take(n).toList();
+    return [positions, scores];
   }
 
-  int score(List<List<dynamic>> matrix, dynamic player) {
+  int _score(List<List<dynamic>> matrix, dynamic player) {
     int sc = 0;
     int myOrbs = 0, enemyOrbs = 0;
-    int total = rows * cols;
+    int total = _rows * _cols;
     for (int k = 0; k < total; k++) {
-      int i = k ~/ cols;
-      int j = k % cols;
+      int i = k ~/ _cols;
+      int j = k % _cols;
 
       if (matrix[i][j][1].player == player) {
         myOrbs += matrix[i][j][0];
         bool isNotVulnerable = true;
         Position pos = Position(i, j);
-        List<dynamic> neighbours = board.getNeighbours(pos);
+        List<dynamic> neighbours = _board.getNeighbours(pos);
         neighbours.forEach((nPos) {
           CellInfo nInfo = matrix[nPos.i][nPos.j][1];
           if (nInfo.player != player &&
-              matrix[nPos.i][nPos.j][0] == (board.criticalMass(nPos) - 1)) {
-            sc -= 5 - board.criticalMass(pos);
+              matrix[nPos.i][nPos.j][0] == (_board.criticalMass(nPos) - 1)) {
+            sc -= 5 - _board.criticalMass(pos);
             isNotVulnerable = false;
           }
         });
         if (isNotVulnerable) {
           // The Side Vertical/Horizontal Heuristic
-          if (board.criticalMass(pos) == 3) {
+          if (_board.criticalMass(pos) == 3) {
             sc += 2;
           }
           // The Corner Heuristic
-          else if (board.criticalMass(pos) == 2) {
+          else if (_board.criticalMass(pos) == 2) {
             sc += 3;
           }
           // The Unstability Heuristic
-          if (matrix[i][j][0] == (board.criticalMass(pos) - 1)) {
+          if (matrix[i][j][0] == (_board.criticalMass(pos) - 1)) {
             sc += 2;
           }
         }
@@ -128,7 +154,7 @@ class Bot {
       return -10000;
     else {
       // The chain Heuristic
-      List<dynamic> chainsList = chains(matrix, player);
+      List<dynamic> chainsList = _chains(matrix, player);
       for (int c = 0; c < chainsList.length; c++) {
         if (c > 1) {
           sc += chainsList[c] * 2;
@@ -138,20 +164,20 @@ class Bot {
     return sc;
   }
 
-  List<List<dynamic>> reactions(
+  List<List<dynamic>> _reactions(
       List<List<dynamic>> matrix, Position pos, String player) {
-    List<List<dynamic>> _matrix = deepClone(matrix);
-    _matrix = move(_matrix, pos, player);
+    List<List<dynamic>> _matrix = _deepClone(matrix);
+    _matrix = _move(_matrix, pos, player);
     int t1 = new DateTime.now().second;
     while (true) {
       List<dynamic> unstable = [];
-      int total = rows * cols;
+      int total = _rows * _cols;
       for (int k = 0; k < total; k++) {
-        int i = k ~/ cols;
-        int j = k % cols;
+        int i = k ~/ _cols;
+        int j = k % _cols;
         Position _pos = Position(i, j);
         int orbs = _matrix[i][j][0];
-        if (orbs >= board.criticalMass(_pos)) {
+        if (orbs >= _board.criticalMass(_pos)) {
           unstable.add(_pos);
         }
       }
@@ -167,10 +193,10 @@ class Bot {
 
       unstable.forEach((uPos) {
         var positionData = _matrix[uPos.i][uPos.j][1];
-        _matrix[uPos.i][uPos.j][0] -= board.criticalMass(uPos);
-        List<dynamic> neighbours = board.getNeighbours(uPos);
+        _matrix[uPos.i][uPos.j][0] -= _board.criticalMass(uPos);
+        List<dynamic> neighbours = _board.getNeighbours(uPos);
         neighbours.forEach((nPos) {
-          _matrix = move(_matrix, nPos, positionData.player);
+          _matrix = _move(_matrix, nPos, positionData.player);
         });
         int orbs = _matrix[uPos.i][uPos.j][0];
         positionData.player = orbs > 0 ? positionData.player : '';
@@ -179,7 +205,7 @@ class Bot {
     return _matrix;
   }
 
-  List<List<dynamic>> move(
+  List<List<dynamic>> _move(
       List<List<dynamic>> matrix, Position pos, String player) {
     matrix[pos.i][pos.j][0]++;
     CellInfo info = matrix[pos.i][pos.j][1];
@@ -187,16 +213,16 @@ class Bot {
     return matrix;
   }
 
-  List<dynamic> chains(List<List<dynamic>> matrix, dynamic player) {
+  List<dynamic> _chains(List<List<dynamic>> matrix, dynamic player) {
     List<dynamic> lengths = [];
-    int total = rows * cols;
+    int total = _rows * _cols;
     for (int k = 0; k < total; k++) {
-      int i = k ~/ cols;
-      int j = k % cols;
+      int i = k ~/ _cols;
+      int j = k % _cols;
       Position pos = Position(i, j);
       int orbs = matrix[i][j][0];
       CellInfo info = matrix[pos.i][pos.j][1];
-      if (orbs == (board.criticalMass(pos) - 1) && info.player == player) {
+      if (orbs == (_board.criticalMass(pos) - 1) && info.player == player) {
         int l = 0;
         List<dynamic> visitingStack = [];
         visitingStack.add(pos);
@@ -204,11 +230,11 @@ class Bot {
           Position _pos = visitingStack.removeLast();
           matrix[_pos.i][_pos.j][0] = 0;
           l += 1;
-          List<dynamic> neighbours = board.getNeighbours(_pos);
+          List<dynamic> neighbours = _board.getNeighbours(_pos);
           neighbours.forEach((nPos) {
             int nOrbs = matrix[nPos.i][nPos.j][0];
             CellInfo nInfo = matrix[nPos.i][nPos.j][1];
-            if (nOrbs == (board.criticalMass(pos) - 1) &&
+            if (nOrbs == (_board.criticalMass(pos) - 1) &&
                 nInfo.player == player) {
               visitingStack.add(nPos);
             }
@@ -220,12 +246,12 @@ class Bot {
     return lengths;
   }
 
-  List<List<dynamic>> deepClone(List<List<dynamic>> matrix) {
-    List<List<dynamic>> _matrix = board.buildMatrix();
-    int total = rows * cols;
+  List<List<dynamic>> _deepClone(List<List<dynamic>> matrix) {
+    List<List<dynamic>> _matrix = _board.buildMatrix();
+    int total = _rows * _cols;
     for (int k = 0; k < total; k++) {
-      int i = k ~/ cols;
-      int j = k % cols;
+      int i = k ~/ _cols;
+      int j = k % _cols;
       CellInfo info = matrix[i][j][1];
       _matrix[i][j][0] = matrix[i][j][0];
       _matrix[i][j][1] = info.copyWith();

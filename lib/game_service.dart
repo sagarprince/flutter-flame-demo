@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter_flame_demo/models.dart';
 import 'package:flutter_flame_demo/board.dart';
-import 'package:threading/threading.dart';
 
 List<dynamic> allPlayers = ['red', 'green'];
 
@@ -36,7 +36,7 @@ class GameService with ChangeNotifier {
   GameService() {
     _board = Board(rows, cols);
     _matrix = _board.buildMatrix();
-    testingData();
+//    testingData();
   }
 
   void setNextPlayer() {
@@ -51,25 +51,24 @@ class GameService with ChangeNotifier {
   void makeMove(Position pos, String player) async {
     _matrix = _board.move(_matrix, pos, player);
     if (_winner == null) {
-//      checkChainReactions(pos, player);
-      var thread = new Thread(() {
-        checkChainReactions(pos, player);
-      });
-      await thread.start();
-      await thread.join();
+      checkChainReactions(pos, player);
     }
-  }
-
-  void playMove(Position pos, String player) {
-    makeMove(pos, player);
     _totalMoves++;
   }
 
+  void playMove(Position pos, String player) {
+    if (playerTurn == 'red') {
+      makeMove(pos, player);
+    }
+  }
+
   void botMove() async {
-    if (_playerTurn == 'green' || _playerTurn == 'blue') {
+    if (_playerTurn == 'green' ||
+        _playerTurn == 'blue' ||
+        _playerTurn == 'orange') {
       Position bestPos = await _board.botMove(_matrix, _playerTurn);
       if (bestPos != null) {
-        playMove(bestPos, _playerTurn);
+        makeMove(bestPos, _playerTurn);
       }
     }
   }
@@ -111,11 +110,7 @@ class GameService with ChangeNotifier {
           break;
         }
 
-        var thread = Thread(() async {
-          await explode(unstable);
-        });
-        await thread.start();
-        await thread.join();
+        await explode(unstable);
       }
       onAfterChainReactions();
     });
@@ -125,7 +120,7 @@ class GameService with ChangeNotifier {
     return await Future.forEach(unstable, (_pos) async {
       var positionData = _matrix[_pos.i][_pos.j][1];
       positionData.isExplode = true;
-//      await Flame.audio.play('pop.mp3');
+      await Flame.audio.play('pop.mp3');
       await new Future.delayed(Duration(
           milliseconds: unstable.length > (_complexityLimit - 2) ? 100 : 220));
       _matrix[_pos.i][_pos.j][0] -= _board.criticalMass(_pos);
@@ -145,7 +140,7 @@ class GameService with ChangeNotifier {
     _winner = evaluateWinner();
     if (winner == null) {
       setNextPlayer();
-//      botMove();
+      botMove();
     } else {
       setWinner();
     }
