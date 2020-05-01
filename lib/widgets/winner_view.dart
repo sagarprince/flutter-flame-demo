@@ -32,7 +32,7 @@ class WinnerView extends StatelessWidget {
                   child: IconButton(
                     icon: Icon(Icons.close),
                     onPressed: () {
-                      CREngine().reset();
+                      CREngine.instance.reset();
                     },
                   ),
                 )

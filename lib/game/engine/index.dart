@@ -1,13 +1,13 @@
+import 'dart:async';
 import 'package:flutter_flame_demo/blocs/bloc.dart';
 import 'package:flutter_flame_demo/blocs/events.dart';
 import 'package:flutter_flame_demo/blocs/state.dart';
 import 'package:flutter_flame_demo/models/player.dart';
 import 'package:flutter_flame_demo/models/position.dart';
-import 'package:flutter_flame_demo/models/cell_info.dart';
 import 'package:flutter_flame_demo/game/engine/board.dart';
 
 class CREngine {
-  static CREngine _instance;
+  static CREngine instance;
   CRBloc _bloc;
   CRState _state;
 
@@ -37,10 +37,10 @@ class CREngine {
   bool _isBotEnabled = false;
 
   factory CREngine([CRBloc bloc, CRState state]) {
-    if (_instance == null) {
-      _instance = new CREngine._internal(bloc, state);
+    if (instance == null) {
+      instance = new CREngine._internal(bloc, state);
     }
-    return _instance;
+    return instance;
   }
 
   CREngine._internal(this._bloc, this._state) {
@@ -49,7 +49,6 @@ class CREngine {
     this.allPlayers = this._state.players;
     this._players = _buildPlayers();
     _playerTurn = allPlayers[0].color;
-//    _testing();
   }
 
   List<String> _buildPlayers() {
@@ -90,6 +89,11 @@ class CREngine {
         makeMove(botPos, _playerTurn);
       }
     }
+  }
+
+  static _reactionsIsolate(pos) {
+    print(pos);
+    print(CREngine.instance);
   }
 
   void _reactions(Position pos, String player) async {
@@ -207,39 +211,5 @@ class CREngine {
 
   void destroy() {
     _board.bot.stopIsolate();
-  }
-
-  // Testing
-  void _testing() {
-    int total = rows * cols;
-    for (int k = 0; k < total; k++) {
-      int i = k ~/ cols; // determines i
-      int j = k % cols; // determines j
-
-      _pTurnIndex =
-          (_players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
-      _playerTurn = _players[_pTurnIndex];
-      _totalMoves++;
-      _board.matrix[i][j][1] = CellInfo(player: _playerTurn);
-
-      // Corner Cells
-      if (((i == 0 && j == 0 ||
-          i == 0 && j == (cols - 1) ||
-          i == (rows - 1) && j == 0 ||
-          i == (rows - 1) && j == (cols - 1)))) {
-        _board.matrix[i][j][0] = 1;
-      }
-
-      // Vertical/Horizontal Side Cells
-      else if (((i > 0 && i < (rows - 1) && (j == 0 || j == (cols - 1))) ||
-          (j > 0 && j < (cols - 1) && (i == 0 || i == (rows - 1))))) {
-        _board.matrix[i][j][0] = 2;
-      }
-
-      // Middle Cells
-      else {
-        _board.matrix[i][j][0] = 3;
-      }
-    }
   }
 }
