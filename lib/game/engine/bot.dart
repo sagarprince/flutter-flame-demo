@@ -1,8 +1,9 @@
 import 'dart:collection';
 import 'dart:async';
 import 'dart:isolate';
-import 'package:flutter_flame_demo/models.dart';
-import 'package:flutter_flame_demo/board.dart';
+import 'package:flutter_flame_demo/models/position.dart';
+import 'package:flutter_flame_demo/models/cell_info.dart';
+import 'package:flutter_flame_demo/game/engine/board.dart';
 
 class Bot {
   int _rows = 9;
@@ -23,7 +24,7 @@ class Bot {
       List<List<dynamic>> matrix = args[1];
       dynamic player = args[2];
       SendPort callbackPort = args[3];
-      List<List<dynamic>> _matrix = bot._deepClone(matrix);
+      List<List<dynamic>> _matrix = bot._clone(matrix);
       List<dynamic> calculatedMove = bot._miniMax(_matrix, player);
       callbackPort.send(calculatedMove);
     }
@@ -36,7 +37,8 @@ class Bot {
         await Isolate.spawn(computeBotMoveOnIsolate, receivePort.sendPort);
     // Get the listener port for the new isolate
     SendPort sendPort = await receivePort.first;
-    dynamic result = await _sendReceive(sendPort, matrix, player);
+    dynamic result = await _communicateWithIsolate(sendPort, matrix, player);
+    print('Return MiniMax $result');
     if (isolate != null) {
       isolate.kill(priority: Isolate.immediate);
       isolate = null;
@@ -46,7 +48,7 @@ class Bot {
   }
 
   // Create your own listening port and send a message to the new isolate
-  Future _sendReceive(
+  Future _communicateWithIsolate(
       SendPort sendPort, List<List<dynamic>> matrix, dynamic player) {
     ReceivePort receivePort = ReceivePort();
     sendPort.send([this, matrix, player, receivePort.sendPort]);
@@ -57,10 +59,13 @@ class Bot {
   List<dynamic> _miniMax(List<List<dynamic>> matrix, player,
       [int depth = 2, int breadth = 2]) {
     List<dynamic> bestMoves = _bestN(matrix, player, breadth);
-    print(bestMoves);
     Position bestMovePos = bestMoves[0][0];
     int bestMoveScore = bestMoves[1][0];
+    depth = bestMoveScore == 10000 ? 1 : depth;
     if (depth == 1) {
+      if (bestMoveScore == 10000) {
+        print('Exit Here $bestMovePos');
+      }
       return [bestMovePos, bestMoveScore];
     }
     List<dynamic> _bestMoves = _bestN(matrix, player, breadth);
@@ -88,7 +93,6 @@ class Bot {
         conf[pos] = _score(_reactions(matrix, pos, player), player);
         // Return just the winning position in case you find one
         if (conf[pos] == 10000) {
-          print('Winning Pos $pos');
           return [
             [pos],
             [10000]
@@ -117,7 +121,7 @@ class Bot {
         myOrbs += matrix[i][j][0];
         bool isNotVulnerable = true;
         Position pos = Position(i, j);
-        List<dynamic> neighbours = _board.getNeighbours(pos);
+        List<dynamic> neighbours = _board.findNeighbours(pos);
         neighbours.forEach((nPos) {
           CellInfo nInfo = matrix[nPos.i][nPos.j][1];
           if (nInfo.player != player &&
@@ -166,7 +170,7 @@ class Bot {
 
   List<List<dynamic>> _reactions(
       List<List<dynamic>> matrix, Position pos, String player) {
-    List<List<dynamic>> _matrix = _deepClone(matrix);
+    List<List<dynamic>> _matrix = _clone(matrix);
     _matrix = _move(_matrix, pos, player);
     int t1 = new DateTime.now().second;
     while (true) {
@@ -194,7 +198,7 @@ class Bot {
       unstable.forEach((uPos) {
         var positionData = _matrix[uPos.i][uPos.j][1];
         _matrix[uPos.i][uPos.j][0] -= _board.criticalMass(uPos);
-        List<dynamic> neighbours = _board.getNeighbours(uPos);
+        List<dynamic> neighbours = _board.findNeighbours(uPos);
         neighbours.forEach((nPos) {
           _matrix = _move(_matrix, nPos, positionData.player);
         });
@@ -230,7 +234,7 @@ class Bot {
           Position _pos = visitingStack.removeLast();
           matrix[_pos.i][_pos.j][0] = 0;
           l += 1;
-          List<dynamic> neighbours = _board.getNeighbours(_pos);
+          List<dynamic> neighbours = _board.findNeighbours(_pos);
           neighbours.forEach((nPos) {
             int nOrbs = matrix[nPos.i][nPos.j][0];
             CellInfo nInfo = matrix[nPos.i][nPos.j][1];
@@ -246,7 +250,7 @@ class Bot {
     return lengths;
   }
 
-  List<List<dynamic>> _deepClone(List<List<dynamic>> matrix) {
+  List<List<dynamic>> _clone(List<List<dynamic>> matrix) {
     List<List<dynamic>> _matrix = _board.buildMatrix();
     int total = _rows * _cols;
     for (int k = 0; k < total; k++) {

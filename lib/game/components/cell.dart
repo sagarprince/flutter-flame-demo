@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flame/components/component.dart';
 import 'package:flame/components/mixins/tapable.dart';
-import 'package:flutter_flame_demo/models.dart';
-import 'package:flutter_flame_demo/game_service.dart';
+import 'package:flutter_flame_demo/models/cell_info.dart';
+import 'package:flutter_flame_demo/models/position.dart';
+import 'package:flutter_flame_demo/game/engine/index.dart';
+import 'package:flutter_flame_demo/utils/styles.dart';
 
 class Cell extends PositionComponent with Tapable {
-  GameService service;
+  CREngine _engine;
   Rect boxRect;
   Paint _boxPaint;
   Paint _tappedPaint;
@@ -14,13 +16,14 @@ class Cell extends PositionComponent with Tapable {
   dynamic positionData;
 
   Cell(
-      {double x = 0,
+      {CREngine engine,
+      double x = 0,
       double y = 0,
       double width = 60,
       double height = 60,
       Position pos,
       dynamic positionData}) {
-    this.service = gameService;
+    this._engine = engine;
     this.x = x;
     this.y = y;
     this.width = width;
@@ -38,7 +41,7 @@ class Cell extends PositionComponent with Tapable {
 
   @override
   void render(Canvas c) {
-    Color playerColor = service.getPlayerColor(service.playerTurn);
+    Color playerColor = AppColors.getColorByName(_engine.playerTurn);
     _boxPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
@@ -59,10 +62,10 @@ class Cell extends PositionComponent with Tapable {
     int orbs = positionData[0];
     CellInfo cellInfo = positionData[1];
     if (orbs <= 3 &&
-        (cellInfo.player == service.playerTurn || cellInfo.player == '') &&
-        !service.isChainReaction) {
+        (cellInfo.player == _engine.playerTurn || cellInfo.player == '') &&
+        !_engine.isChainReaction) {
       _beenTapped = true;
-      this.service.playMove(pos, service.playerTurn);
+      this._engine.humanMove(pos, _engine.playerTurn);
     }
   }
 

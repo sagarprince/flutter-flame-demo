@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flame/components/component.dart';
-import 'package:flame/components/mixins/has_game_ref.dart';
-import 'package:flutter_flame_demo/chain_reaction_game.dart';
+import 'package:flutter_flame_demo/utils/styles.dart';
 
-class Background extends PositionComponent with HasGameRef<ChainReactionGame> {
-  static final Paint _paint = Paint()..color = const Color(0xff222222);
+class Background extends PositionComponent {
+  static final Paint _paint = Paint()..color = AppColors.black;
 
   Background() {
     x = y = 0;

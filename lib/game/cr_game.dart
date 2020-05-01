@@ -3,47 +3,46 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/position.dart' as FlamePosition;
 import 'package:flame/text_config.dart';
-import 'package:flutter_flame_demo/background.dart';
-import 'package:flutter_flame_demo/game_service.dart';
-import 'package:flutter_flame_demo/models.dart';
-import 'package:flutter_flame_demo/cell.dart';
-import 'package:flutter_flame_demo/orbs.dart';
+import 'package:flutter_flame_demo/game/components/background.dart';
+import 'package:flutter_flame_demo/game/components/cell.dart';
+import 'package:flutter_flame_demo/game/components/orbs.dart';
+import 'package:flutter_flame_demo/models/position.dart';
+import 'package:flutter_flame_demo/game/engine/index.dart';
 
-class ChainReactionGame extends BaseGame {
+class CRGame extends BaseGame {
   Size screenSize;
-  int col = 6;
-  int row = 9;
-  bool isGridRendering = false;
-  GameService service;
+  bool _isGridRendering = false;
+  CREngine _engine;
 
   final TextConfig fpsTextConfig =
       const TextConfig(color: const Color(0xFFFFFFFF));
 
-  ChainReactionGame() {
-    this.service = gameService;
+  CRGame(CREngine engine) {
+    this._engine = engine;
     add(Background());
   }
 
   @override
-  bool debugMode() => true;
+  bool debugMode() => false;
 
   void buildGrid() {
-    if (screenSize != null && !isGridRendering) {
-      isGridRendering = true;
-      int total = service.rows * service.cols;
+    if (screenSize != null && !_isGridRendering) {
+      _isGridRendering = true;
+      int total = _engine.rows * _engine.cols;
       for (int k = 0; k < total; k++) {
-        int i = k ~/ service.cols;
-        int j = k % service.cols;
+        int i = k ~/ _engine.cols;
+        int j = k % _engine.cols;
 
-        double width = (screenSize.width / col);
-        double height = (screenSize.height / row);
+        double width = (screenSize.width / _engine.cols);
+        double height = (screenSize.height / _engine.rows);
         double x = j * width;
         double y = i * height;
 
         Position pos = Position(i, j);
-        var positionData = service.matrix[i][j];
+        var positionData = _engine.board.matrix[i][j];
 
         Cell cell = Cell(
+            engine: _engine,
             x: x,
             y: y,
             width: width,
@@ -52,6 +51,7 @@ class ChainReactionGame extends BaseGame {
             positionData: positionData);
 
         Orbs orbs = Orbs(
+            engine: _engine,
             x: x,
             y: y,
             width: width,
