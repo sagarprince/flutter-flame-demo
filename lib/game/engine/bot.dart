@@ -9,11 +9,21 @@ class Bot {
   int _rows = 9;
   int _cols = 6;
   Board _board;
+  SendPort _sendPort;
+  Isolate _isolate;
 
   Bot(Board board) {
     this._board = board;
     this._rows = this._board.rows;
     this._cols = this._board.cols;
+    _startIsolate();
+  }
+
+  _startIsolate() async {
+    var receivePort = new ReceivePort();
+    _isolate =
+        await Isolate.spawn(computeBotMoveOnIsolate, receivePort.sendPort);
+    _sendPort = await receivePort.first;
   }
 
   static computeBotMoveOnIsolate(SendPort sendPort) async {
@@ -31,19 +41,9 @@ class Bot {
   }
 
   Future<Position> play(List<List<dynamic>> matrix, dynamic player) async {
-    ReceivePort receivePort = ReceivePort();
     await Future.delayed(Duration(milliseconds: 600));
-    Isolate isolate =
-        await Isolate.spawn(computeBotMoveOnIsolate, receivePort.sendPort);
-    // Get the listener port for the new isolate
-    SendPort sendPort = await receivePort.first;
-    dynamic result = await _communicateWithIsolate(sendPort, matrix, player);
+    dynamic result = await _communicateWithIsolate(_sendPort, matrix, player);
     print('Return MiniMax $result');
-    if (isolate != null) {
-      isolate.kill(priority: Isolate.immediate);
-      isolate = null;
-      receivePort.close();
-    }
     return result[0];
   }
 
@@ -261,5 +261,12 @@ class Bot {
       _matrix[i][j][1] = info.copyWith();
     }
     return _matrix;
+  }
+
+  void stopIsolate() {
+    if (_isolate != null) {
+      _isolate.kill(priority: Isolate.immediate);
+      _isolate = null;
+    }
   }
 }

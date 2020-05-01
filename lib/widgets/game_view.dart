@@ -17,17 +17,24 @@ class GameView extends StatefulWidget {
 }
 
 class _GameViewState extends State<GameView> {
+  CREngine _engine;
   CRGame _game;
 
   @override
   void initState() {
-    CREngine engine = CREngine(widget.bloc, widget.state);
-    _game = CRGame(engine);
+    _engine = CREngine(widget.bloc, widget.state);
+    _game = CRGame(_engine);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return _game.widget;
+  }
+
+  @override
+  void dispose() {
+    _engine.destroy();
+    super.dispose();
   }
 }

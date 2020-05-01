@@ -7,6 +7,7 @@ import 'package:flutter_flame_demo/game/engine/bot.dart';
 class Board {
   int rows = 0;
   int cols = 0;
+  bool isBotEnabled = false;
   Bot bot;
 
   List<List<dynamic>> _matrix = [];
@@ -14,10 +15,12 @@ class Board {
 
   int complexityLimit = 18;
 
-  Board([rows = 9, cols = 6]) {
+  Board([rows = 9, cols = 6, isBotEnabled = false]) {
     this.rows = rows;
     this.cols = cols;
-    this.bot = Bot(this);
+    if (isBotEnabled) {
+      this.bot = Bot(this);
+    }
     this._matrix = buildMatrix();
   }
 

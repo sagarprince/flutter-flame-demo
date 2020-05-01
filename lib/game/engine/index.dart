@@ -34,6 +34,8 @@ class CREngine {
   String _winner = '';
   String get winner => _winner;
 
+  bool _isBotEnabled = false;
+
   factory CREngine([CRBloc bloc, CRState state]) {
     if (_instance == null) {
       _instance = new CREngine._internal(bloc, state);
@@ -42,7 +44,8 @@ class CREngine {
   }
 
   CREngine._internal(this._bloc, this._state) {
-    this._board = Board(rows, cols);
+    _isBotEnabled = this._state.gameMode == GameMode.PlayWithBot ? true : false;
+    this._board = Board(rows, cols, _isBotEnabled);
     this.allPlayers = this._state.players;
     this._players = _buildPlayers();
     _playerTurn = allPlayers[0].color;
@@ -80,8 +83,8 @@ class CREngine {
     }
   }
 
-  void botMove() async {
-    if (_isBotPlayer(_playerTurn)) {
+  void _setBotMove() async {
+    if (_isBotPlayer(_playerTurn) && _isBotEnabled) {
       Position botPos = await _board.bot.play(_board.matrix, _playerTurn);
       if (botPos != null) {
         makeMove(botPos, _playerTurn);
@@ -126,7 +129,7 @@ class CREngine {
     _winner = _evaluateWinner();
     if (_winner == '') {
       _setNextPlayer();
-      botMove();
+      _setBotMove();
     } else {
       _setWinner();
     }
@@ -200,6 +203,10 @@ class CREngine {
     _totalMoves = 0;
     _winner = '';
     _bloc.add(SetWinnerEvent(Player('', '', true)));
+  }
+
+  void destroy() {
+    _board.bot.stopIsolate();
   }
 
   // Testing
