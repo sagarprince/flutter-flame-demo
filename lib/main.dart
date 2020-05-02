@@ -21,11 +21,7 @@ class MyGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_context) {
-        CRBloc _bloc = CRBloc();
-        SharedInstances.context = _context;
-        return _bloc;
-      },
+      create: (_context) => CRBloc(),
       child: MaterialApp(
         title: 'Chain Reaction',
         debugShowCheckedModeBanner: false,

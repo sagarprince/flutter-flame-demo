@@ -4,6 +4,7 @@ import 'package:flutter_flame_demo/models/player.dart';
 import 'package:flutter_flame_demo/models/position.dart';
 import 'package:flutter_flame_demo/game/engine/board.dart';
 import 'package:flutter_flame_demo/models/cell_info.dart';
+import 'package:flutter_flame_demo/shared_instances.dart';
 
 class CREngine {
   CRState _state;
