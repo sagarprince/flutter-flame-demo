@@ -3,7 +3,7 @@ import 'package:flame/components/component.dart';
 import 'package:flame/components/mixins/tapable.dart';
 import 'package:flutter_flame_demo/models/cell_info.dart';
 import 'package:flutter_flame_demo/models/position.dart';
-import 'package:flutter_flame_demo/game/engine/index.dart';
+import 'package:flutter_flame_demo/game/engine/engine.dart';
 import 'package:flutter_flame_demo/utils/styles.dart';
 
 class Cell extends PositionComponent with Tapable {

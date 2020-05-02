@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_flame_demo/manager.dart';
+import 'package:flutter_flame_demo/shared_instances.dart';
 import 'package:flutter_flame_demo/theme.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/utils/keys.dart';
@@ -20,7 +21,11 @@ class MyGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => CRBloc(),
+      create: (_context) {
+        CRBloc _bloc = CRBloc();
+        SharedInstances.context = _context;
+        return _bloc;
+      },
       child: MaterialApp(
         title: 'Chain Reaction',
         debugShowCheckedModeBanner: false,

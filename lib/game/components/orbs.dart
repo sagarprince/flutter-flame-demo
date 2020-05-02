@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flame/components/component.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter_flame_demo/game/engine/index.dart';
+import 'package:flutter_flame_demo/game/engine/engine.dart';
 import 'package:flutter_flame_demo/models/position.dart';
 import 'package:flutter_flame_demo/models/cell_info.dart';
 import 'package:flutter_flame_demo/utils/styles.dart';

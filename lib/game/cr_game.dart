@@ -7,7 +7,7 @@ import 'package:flutter_flame_demo/game/components/background.dart';
 import 'package:flutter_flame_demo/game/components/cell.dart';
 import 'package:flutter_flame_demo/game/components/orbs.dart';
 import 'package:flutter_flame_demo/models/position.dart';
-import 'package:flutter_flame_demo/game/engine/index.dart';
+import 'package:flutter_flame_demo/game/engine/engine.dart';
 
 class CRGame extends BaseGame {
   Size screenSize;

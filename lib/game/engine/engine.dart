@@ -1,14 +1,11 @@
 import 'dart:async';
-import 'package:flutter_flame_demo/blocs/bloc.dart';
-import 'package:flutter_flame_demo/blocs/events.dart';
 import 'package:flutter_flame_demo/blocs/state.dart';
 import 'package:flutter_flame_demo/models/player.dart';
 import 'package:flutter_flame_demo/models/position.dart';
 import 'package:flutter_flame_demo/game/engine/board.dart';
+import 'package:flutter_flame_demo/models/cell_info.dart';
 
 class CREngine {
-  static CREngine instance;
-  CRBloc _bloc;
   CRState _state;
 
   int rows = 9;
@@ -36,19 +33,17 @@ class CREngine {
 
   bool _isBotEnabled = false;
 
-  factory CREngine([CRBloc bloc, CRState state]) {
-    if (instance == null) {
-      instance = new CREngine._internal(bloc, state);
-    }
-    return instance;
-  }
+  Function _onWinner;
 
-  CREngine._internal(this._bloc, this._state) {
-    _isBotEnabled = this._state.gameMode == GameMode.PlayWithBot ? true : false;
-    this._board = Board(rows, cols, _isBotEnabled);
-    this.allPlayers = this._state.players;
-    this._players = _buildPlayers();
+  CREngine(CRState state, [Function onWinner]) {
+    this._state = state;
+    this.allPlayers = _state.players;
     _playerTurn = allPlayers[0].color;
+    _isBotEnabled = _state.gameMode == GameMode.PlayWithBot ? true : false;
+    this._board = Board(rows, cols, _isBotEnabled);
+    this._players = _buildPlayers();
+    this._onWinner = onWinner;
+//    _testing();
   }
 
   List<String> _buildPlayers() {
@@ -91,11 +86,6 @@ class CREngine {
     }
   }
 
-  static _reactionsIsolate(pos) {
-    print(pos);
-    print(CREngine.instance);
-  }
-
   void _reactions(Position pos, String player) async {
     Future.microtask(() async {
       while (_winner == '') {
@@ -104,10 +94,10 @@ class CREngine {
 
         // Evaluate winner
         _winner = _evaluateWinner();
+
         // If Winner then Set It
         if (_winner != '') {
           unstable = [];
-          _setWinner();
         }
 
         // If unstable size gets complex then shuffle unstable list
@@ -130,7 +120,6 @@ class CREngine {
 
   void _afterReactionsCompleted() {
     _isChainReaction = false;
-    _winner = _evaluateWinner();
     if (_winner == '') {
       _setNextPlayer();
       _setBotMove();
@@ -174,11 +163,14 @@ class CREngine {
     return winner;
   }
 
-  void _setWinner() {
+  void _setWinner() async {
     if (_winner != '') {
       _playerTurn = _winner;
       _board.setEquivalentOrbs();
-      _bloc.add(SetWinnerEvent(_getPlayer(_winner)));
+      await Future.delayed(Duration(milliseconds: 600));
+      if (_onWinner != null) {
+        _onWinner(_getPlayer(_winner));
+      }
     }
   }
 
@@ -206,10 +198,44 @@ class CREngine {
     _playerTurn = _players[_pTurnIndex];
     _totalMoves = 0;
     _winner = '';
-    _bloc.add(SetWinnerEvent(Player('', '', true)));
   }
 
   void destroy() {
+    reset();
     _board.bot.stopIsolate();
+  }
+
+  // Testing
+  void _testing() {
+    int total = rows * cols;
+    for (int k = 0; k < total; k++) {
+      int i = k ~/ cols; // determines i
+      int j = k % cols; // determines j
+
+      _pTurnIndex =
+          (_players.length - 1) == _pTurnIndex ? 0 : (_pTurnIndex + 1);
+      _playerTurn = _players[_pTurnIndex];
+      _totalMoves++;
+      _board.matrix[i][j][1] = CellInfo(player: _playerTurn);
+
+      // Corner Cells
+      if (((i == 0 && j == 0 ||
+          i == 0 && j == (cols - 1) ||
+          i == (rows - 1) && j == 0 ||
+          i == (rows - 1) && j == (cols - 1)))) {
+        _board.matrix[i][j][0] = 1;
+      }
+
+      // Vertical/Horizontal Side Cells
+      else if (((i > 0 && i < (rows - 1) && (j == 0 || j == (cols - 1))) ||
+          (j > 0 && j < (cols - 1) && (i == 0 || i == (rows - 1))))) {
+        _board.matrix[i][j][0] = 2;
+      }
+
+      // Middle Cells
+      else {
+        _board.matrix[i][j][0] = 3;
+      }
+    }
   }
 }
