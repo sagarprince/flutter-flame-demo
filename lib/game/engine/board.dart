@@ -106,7 +106,6 @@ class Board {
     return await Future.forEach(unstable, (pos) async {
       var positionData = _matrix[pos.i][pos.j][1];
       positionData.isExplode = true;
-//      await Flame.audio.play('pop.mp3');
       ExplodeSound.play();
       await new Future.delayed(Duration(
           milliseconds: unstable.length > (complexityLimit - 2) ? 100 : 220));
