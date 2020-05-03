@@ -37,7 +37,6 @@ class LandingScreen extends StatelessWidget {
                         gameMode: GameMode.PlayWithBot,
                         players: [
                           Player('Sagar', 'red', true),
-                          Player('Vaishali', 'blue', false),
                           Player('Bot', 'green', false),
                         ]));
                     Navigator.of(context).pushNamed(AppRoutes.play_game);

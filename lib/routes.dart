@@ -4,6 +4,7 @@ import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/screens/landing_screen.dart';
 import 'package:flutter_flame_demo/screens/game_screen.dart';
 import 'package:flutter_flame_demo/screens/winner_screen.dart';
+import 'package:flutter_flame_demo/screens/result_screen.dart';
 
 class ScaleRoute extends PageRouteBuilder {
   final Widget page;
@@ -48,6 +49,9 @@ class Routes {
         break;
       case AppRoutes.winner:
         return ScaleRoute(page: WinnerScreen());
+        break;
+      case AppRoutes.result:
+        return ScaleRoute(page: ResultScreen());
         break;
     }
   }

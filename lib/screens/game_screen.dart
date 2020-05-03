@@ -69,7 +69,7 @@ class _GameViewState extends State<GameView> {
       print('Winner');
       print(winner);
       widget.bloc.add(SetWinnerEvent(winner));
-      Keys.navigatorKey.currentState.pushReplacementNamed(AppRoutes.winner);
+      Keys.navigatorKey.currentState.pushReplacementNamed(AppRoutes.result);
     });
     _game = CRGame(_engine);
     SharedInstances.engine = _engine;

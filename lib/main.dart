@@ -11,6 +11,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   AppManager.setup();
   GameManager.setup();
+  FlareAssets.preload();
   runApp(MyGame());
 }
 

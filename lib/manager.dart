@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/util.dart';
 import 'package:flutter/services.dart';
+import 'package:flare_flutter/asset_provider.dart';
+import 'package:flare_flutter/provider/asset_flare.dart';
+import 'package:flare_flutter/flare_cache.dart';
 
 class AppManager {
   static void setup() {
@@ -22,5 +25,18 @@ class GameManager {
     await Flame.audio.loadAll(<String>[
       'pop.mp3',
     ]);
+  }
+}
+
+// Flares
+class FlareAssets {
+  static List<AssetProvider> assets = [
+    AssetFlare(bundle: rootBundle, name: 'assets/flares/character.flr'),
+    AssetFlare(bundle: rootBundle, name: 'assets/flares/fireworks.flr'),
+  ];
+  static Future<void> preload() async {
+    for (final asset in assets) {
+      await cachedActor(asset);
+    }
   }
 }

@@ -22,8 +22,8 @@ class WinnerScreen extends StatefulWidget {
 class _WinnerScreenState extends State<WinnerScreen> {
   String _animationName = "Animations";
 
-  final asset = AssetFlare(
-      bundle: rootBundle, name: "assets/flares/winner_animation.flr");
+  final asset =
+      AssetFlare(bundle: rootBundle, name: "assets/flares/fireworks.flr");
 
   void _resetWinner(BuildContext context) {
     BlocProvider.of<CRBloc>(context).add(SetWinnerEvent(Player('', '', true)));

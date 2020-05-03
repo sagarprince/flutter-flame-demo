@@ -4,6 +4,9 @@ class AppColors {
   static const Color red = Colors.redAccent;
   static const Color white = const Color(0xFFFFFFFF);
   static const Color black = const Color(0xFF222222);
+  static const Color cardinal = const Color(0xFFBC154C);
+  static const Color razzmatazz = const Color(0xFFF01C62);
+  static const Color blueGrey = Colors.blueGrey;
   static Color darken(Color color, [double amount = .1]) {
     assert(amount >= 0 && amount <= 1);
     final hsl = HSLColor.fromColor(color);
