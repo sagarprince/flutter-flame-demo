@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_flame_demo/manager.dart';
-import 'package:flutter_flame_demo/shared_instances.dart';
 import 'package:flutter_flame_demo/theme.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/utils/keys.dart';

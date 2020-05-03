@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter_flame_demo/blocs/state.dart';
 import 'package:flutter_flame_demo/models/player.dart';
 import 'package:flutter_flame_demo/models/position.dart';
 import 'package:flutter_flame_demo/game/engine/board.dart';
 import 'package:flutter_flame_demo/models/cell_info.dart';
-import 'package:flutter_flame_demo/shared_instances.dart';
 
 class CREngine {
   CRState _state;
@@ -72,13 +72,14 @@ class CREngine {
     _totalMoves++;
   }
 
-  void humanMove(Position pos, String player) {
+  void humanMove(Position pos, String player) async {
     if (_isHumanPlayer(player)) {
       makeMove(pos, player);
+      await HapticFeedback.vibrate(); // vibrate
     }
   }
 
-  void _setBotMove() async {
+  void _botMove() async {
     if (_isBotPlayer(_playerTurn) && _isBotEnabled) {
       Position botPos = await _board.bot.play(_board.matrix, _playerTurn);
       if (botPos != null) {
@@ -123,7 +124,7 @@ class CREngine {
     _isChainReaction = false;
     if (_winner == '') {
       _setNextPlayer();
-      _setBotMove();
+      _botMove();
     } else {
       _setWinner();
     }

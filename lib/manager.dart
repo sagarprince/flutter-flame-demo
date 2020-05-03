@@ -10,10 +10,6 @@ class AppManager {
         statusBarBrightness:
             Brightness.dark // Dark == white status bar -- for IOS.
         ));
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.portraitUp,
-    ]);
   }
 }
 

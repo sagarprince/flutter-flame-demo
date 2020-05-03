@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:flame/flame.dart';
+import 'package:flutter_flame_demo/utils/utils.dart';
 import 'package:flutter_flame_demo/models/position.dart';
 import 'package:flutter_flame_demo/models/cell_info.dart';
 import 'package:flutter_flame_demo/game/engine/bot.dart';
@@ -106,7 +106,8 @@ class Board {
     return await Future.forEach(unstable, (pos) async {
       var positionData = _matrix[pos.i][pos.j][1];
       positionData.isExplode = true;
-      await Flame.audio.play('pop.mp3');
+//      await Flame.audio.play('pop.mp3');
+      ExplodeSound.play();
       await new Future.delayed(Duration(
           milliseconds: unstable.length > (complexityLimit - 2) ? 100 : 220));
       _matrix[pos.i][pos.j][0] -= criticalMass(pos);
