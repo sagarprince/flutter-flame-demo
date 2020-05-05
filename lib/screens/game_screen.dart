@@ -8,7 +8,7 @@ import 'package:flutter_flame_demo/game/engine/engine.dart';
 import 'package:flutter_flame_demo/shared_instances.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/utils/keys.dart';
-import 'package:flutter_flame_demo/widgets/back_button.dart';
+import 'package:flutter_flame_demo/utils/ui_utils.dart';
 import 'package:flutter_flame_demo/widgets/full_background.dart';
 
 class GameScreen extends StatelessWidget {
@@ -16,38 +16,89 @@ class GameScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocBuilder<CRBloc, CRState>(
-        condition: (prevState, state) {
-          return prevState != state;
-        },
-        builder: (context, state) {
-          return Container(
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                FullBackground(),
-                Positioned.fill(
-                  child: SafeArea(
-                    child: Container(
-                      padding: EdgeInsets.only(
-                          left: 10, right: 10, top: 60, bottom: 10),
-                      child: GameView(
-                          bloc: BlocProvider.of<CRBloc>(context), state: state),
+    return WillPopScope(
+      onWillPop: () {
+        return UiUtils.confirmDialog(
+            context: context,
+            title: 'Exit Game',
+            message: 'Do you want to exit game?');
+      },
+      child: Scaffold(
+        body: BlocBuilder<CRBloc, CRState>(
+          condition: (prevState, state) {
+            return prevState != state;
+          },
+          builder: (context, state) {
+            return Container(
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  FullBackground(),
+                  Positioned.fill(
+                    child: SafeArea(
+                      child: Container(
+                        padding: EdgeInsets.only(
+                            left: 10, right: 10, top: 50, bottom: 10),
+                        child: GameView(
+                            bloc: BlocProvider.of<CRBloc>(context),
+                            state: state),
+                      ),
                     ),
                   ),
-                ),
-                Positioned.fill(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[],
-                )),
-                CustomBackButton()
-              ],
-            ),
-          );
-        },
+                  Positioned.fill(
+                      child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[],
+                  )),
+                  Positioned(
+                    top: MediaQuery.of(context).padding.top,
+                    left: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Image.asset(
+                              'assets/images/close.png',
+                            ),
+                            iconSize: 32.0,
+                            onPressed: () {
+                              if (Navigator.canPop(context)) {
+                                Navigator.maybePop(context);
+                              }
+                            },
+                          ),
+                          Row(
+                            children: <Widget>[
+                              IconButton(
+                                icon:
+                                    Icon(Icons.volume_up, color: Colors.white),
+                                iconSize: 34.0,
+                                onPressed: () {},
+                              ),
+                              IconButton(
+                                icon: Image.asset(
+                                  'assets/images/rules.png',
+                                ),
+                                iconSize: 34.0,
+                                onPressed: () {
+                                  UiUtils.showGameRulesDialog(context);
+                                },
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

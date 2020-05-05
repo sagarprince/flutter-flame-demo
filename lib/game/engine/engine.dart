@@ -204,7 +204,9 @@ class CREngine {
 
   void destroy() {
     reset();
-    _board.bot.stopIsolate();
+    if (_board.bot != null) {
+      _board.bot.stopIsolate();
+    }
   }
 
   // Testing

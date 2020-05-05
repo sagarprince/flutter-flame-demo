@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_flame_demo/screens/versus_bot_screen.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/screens/landing_screen.dart';
+import 'package:flutter_flame_demo/screens/versus_bot_screen.dart';
+import 'package:flutter_flame_demo/screens/multiplayer_options_screen.dart';
+import 'package:flutter_flame_demo/screens/multiplayer_offline_screen.dart';
 import 'package:flutter_flame_demo/screens/game_screen.dart';
 import 'package:flutter_flame_demo/screens/winner_screen.dart';
 import 'package:flutter_flame_demo/screens/result_screen.dart';
@@ -48,6 +50,14 @@ class Routes {
       case AppRoutes.versus_bot:
         return CupertinoPageRoute(
             settings: settings, builder: (_) => VersusBotScreen());
+        break;
+      case AppRoutes.multi_player:
+        return CupertinoPageRoute(
+            settings: settings, builder: (_) => MultiPlayerOptionsScreen());
+        break;
+      case AppRoutes.multi_player_offline:
+        return CupertinoPageRoute(
+            settings: settings, builder: (_) => MultiPlayerOfflineScreen());
         break;
       case AppRoutes.play_game:
         return ScaleRoute(page: GameScreen());

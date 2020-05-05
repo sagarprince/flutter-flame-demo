@@ -9,7 +9,7 @@ import 'package:flutter_flame_demo/blocs/events.dart';
 import 'package:flutter_flame_demo/blocs/state.dart';
 import 'package:flutter_flame_demo/blocs/bloc.dart';
 import 'package:flutter_flame_demo/widgets/animated_button.dart';
-import 'package:flutter_flame_demo/widgets/back_button.dart';
+import 'package:flutter_flame_demo/widgets/positional_back_button.dart';
 import 'package:flutter_flame_demo/widgets/color_chooser.dart';
 import 'package:flutter_flame_demo/widgets/full_background.dart';
 
@@ -63,11 +63,7 @@ class _VersusBotScreenState extends State<VersusBotScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         Text('Choose Your Color',
-                            style: TextStyle(
-                                fontFamily: AppFonts.secondary,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 22.0,
-                                color: AppColors.white)),
+                            style: AppTextStyles.mediumText),
                         SizedBox(height: 20.0),
                         ColorChooser(
                           disabled: isBotChoosingColor,
@@ -83,11 +79,7 @@ class _VersusBotScreenState extends State<VersusBotScreen> {
                         SizedBox(height: 40.0),
                         yourColor != ''
                             ? Text(isBotChoosingColor ? 'Wait...' : 'Bot Color',
-                                style: TextStyle(
-                                    fontFamily: AppFonts.secondary,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 22.0,
-                                    color: AppColors.white))
+                                style: AppTextStyles.mediumText)
                             : SizedBox(),
                         yourColor != ''
                             ? ColorChooser(
@@ -117,11 +109,7 @@ class _VersusBotScreenState extends State<VersusBotScreen> {
                       width: 200,
                       height: 48.0,
                       child: AnimatedButton(
-                          title: Text('START',
-                              style: TextStyle(
-                                  fontFamily: AppFonts.secondary,
-                                  color: AppColors.white,
-                                  fontSize: 22.0)),
+                          child: Text('START', style: AppTextStyles.buttonText),
                           onPressed: () {
                             BlocProvider.of<CRBloc>(context).add(StartGameEvent(
                                 gameMode: GameMode.PlayVersusBot,
@@ -137,7 +125,7 @@ class _VersusBotScreenState extends State<VersusBotScreen> {
                 ),
               ),
             ),
-            CustomBackButton(),
+            PositionalBackButton(),
           ],
         ),
       ),

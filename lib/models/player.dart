@@ -3,13 +3,14 @@ import 'package:equatable/equatable.dart';
 // Game Player
 class Player extends Equatable {
   /// Convenient constructor.
-  const Player(this.name, this.color, this.isHuman) : assert(isHuman != null);
+  Player([this.name = '', this.color = '', this.isHuman = false])
+      : assert(isHuman != null);
 
   /// The Name.
   final String name;
 
   /// The Color.
-  final String color;
+  String color;
 
   /// The Human.
   final bool isHuman;

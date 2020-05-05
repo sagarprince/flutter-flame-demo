@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_flame_demo/models/player.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/utils/styles.dart';
-import 'package:flutter_flame_demo/blocs/events.dart';
-import 'package:flutter_flame_demo/blocs/state.dart';
-import 'package:flutter_flame_demo/blocs/bloc.dart';
+import 'package:flutter_flame_demo/utils/ui_utils.dart';
 import 'package:flutter_flame_demo/widgets/full_background.dart';
-import 'package:flutter_flame_demo/widgets/game_rules_modal.dart';
 import 'package:flutter_flame_demo/widgets/play_game_button.dart';
 
 class LandingScreen extends StatelessWidget {
@@ -52,7 +47,10 @@ class LandingScreen extends StatelessWidget {
                           PlayGameButton(
                             icon1: Icons.play_arrow,
                             icon2: Icons.group,
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .pushNamed(AppRoutes.multi_player);
+                            },
                           ),
                         ],
                       ),
@@ -67,10 +65,12 @@ class LandingScreen extends StatelessWidget {
             top: 40,
             right: 15,
             child: IconButton(
-              icon: Icon(Icons.info_outline,
-                  color: Colors.blueAccent, size: 38.0),
+              icon: Image.asset(
+                'assets/images/rules.png',
+              ),
+              iconSize: 34.0,
               onPressed: () {
-                showGameRulesDialog(context);
+                UiUtils.showGameRulesDialog(context);
               },
             ),
           )

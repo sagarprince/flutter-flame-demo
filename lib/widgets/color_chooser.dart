@@ -5,13 +5,15 @@ import 'package:flutter_flame_demo/widgets/color_button.dart';
 class ColorChooser extends StatefulWidget {
   final String activeColor;
   final bool disabled;
+  final List<String> disableColors;
   final Function onSelection;
 
   ColorChooser(
       {Key key,
       this.activeColor = '',
       this.disabled = false,
-      @required this.onSelection})
+      this.disableColors = const [],
+      this.onSelection})
       : super(key: key);
 
   _ColorChooserState createState() => _ColorChooserState();
@@ -35,13 +37,18 @@ class _ColorChooserState extends State<ColorChooser> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: colors.map((color) {
+          bool disabled = widget.disabled;
+          if (widget.disableColors.length > 0 &&
+              widget.disableColors.indexOf(color) > -1) {
+            disabled = true;
+          }
           return ColorButton(
               color: color,
               width: (MediaQuery.of(context).size.width / 5) - 8,
               height: 60.0,
               isSelected: selectedColor == color,
               onPressed: () {
-                if (widget.onSelection != null && !widget.disabled) {
+                if (widget.onSelection != null && !disabled) {
                   setState(() {
                     selectedColor = color;
                   });

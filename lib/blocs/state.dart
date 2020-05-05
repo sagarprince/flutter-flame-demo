@@ -4,8 +4,7 @@ import 'package:flutter_flame_demo/models/player.dart';
 /// Representation of the game state.
 class CRState extends Equatable {
   /// Convenient constructor.
-  const CRState(
-      {this.gameMode, this.players, this.winner = const Player('', '', true)});
+  const CRState({this.gameMode, this.players, this.winner});
 
   /// Game Mode
   final GameMode gameMode;

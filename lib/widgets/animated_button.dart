@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_flame_demo/utils/styles.dart';
 
 class AnimatedButton extends StatefulWidget {
-  final Widget title;
+  final Widget child;
   final VoidCallback onPressed;
 
-  AnimatedButton({Key key, @required this.title, this.onPressed})
-      : assert(title != null),
+  AnimatedButton({Key key, @required this.child, this.onPressed})
+      : assert(child != null),
         super(key: key);
 
   @override
@@ -70,7 +70,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
               ],
             )),
         child: Center(
-          child: widget.title,
+          child: widget.child,
         ),
       );
 

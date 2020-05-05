@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flame/components/component.dart';
 import 'package:flame/sprite.dart';
-import 'package:flutter_flame_demo/utils/styles.dart';
 
 class Background extends PositionComponent {
   Sprite bgSprite;
