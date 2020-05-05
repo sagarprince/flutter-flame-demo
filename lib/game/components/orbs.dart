@@ -187,17 +187,17 @@ class Orbs extends PositionComponent {
   void _drawOrb(Canvas canvas, double dx, double dy) {
     Rect circleRect = new Rect.fromCircle(
       center: new Offset(dx, dy),
-      radius: 10.0,
+      radius: 12.0,
     );
 
     Color playerColor = AppColors.getColorByName(cellInfo.player);
 
     var _gradient = LinearGradient(
-      begin: Alignment.topLeft,
+      begin: Alignment.topCenter,
       end: Alignment(0.5, 1.0),
       colors: [
         playerColor,
-        AppColors.darken(playerColor, 0.3)
+        AppColors.darken(playerColor, 0.35)
       ], // whitish to gray
       tileMode: TileMode.clamp,
     );
@@ -205,6 +205,6 @@ class Orbs extends PositionComponent {
     // create the Shader from the gradient and the bounding square
     final Paint paint = new Paint()
       ..shader = _gradient.createShader(circleRect);
-    canvas.drawCircle(Offset(dx, dy), 10, paint);
+    canvas.drawCircle(Offset(dx, dy), 12, paint);
   }
 }

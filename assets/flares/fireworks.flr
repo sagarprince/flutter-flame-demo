@@ -31590,35 +31590,6 @@
 					"height": 2134,
 					"cornerRadius": 0,
 					"type": "rectangle"
-				},
-				{
-					"name": "Color",
-					"parent": 1395,
-					"opacity": 1,
-					"numColorStops": 2,
-					"colorStops": [
-						0.03355475515127182,
-						0.006071422714740038,
-						0.2023809552192688,
-						1,
-						0,
-						0,
-						0,
-						0,
-						1,
-						1
-					],
-					"start": [
-						0,
-						13
-					],
-					"end": [
-						-26.66668701171875,
-						1340.3323974609375
-					],
-					"secondaryRadiusScale": 1,
-					"fillRule": 1,
-					"type": "radialGradientFill"
 				}
 			],
 			"animations": [

@@ -8,6 +8,8 @@ import 'package:flutter_flame_demo/game/engine/engine.dart';
 import 'package:flutter_flame_demo/shared_instances.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/utils/keys.dart';
+import 'package:flutter_flame_demo/widgets/back_button.dart';
+import 'package:flutter_flame_demo/widgets/full_background.dart';
 
 class GameScreen extends StatelessWidget {
   GameScreen({Key key}) : super(key: key);
@@ -15,33 +17,37 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: BlocBuilder<CRBloc, CRState>(
-          condition: (prevState, state) {
-            return prevState != state;
-          },
-          builder: (context, state) {
-            return Container(
-              padding:
-                  EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 20),
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  Positioned.fill(
-                    child: GameView(
-                        bloc: BlocProvider.of<CRBloc>(context), state: state),
+      body: BlocBuilder<CRBloc, CRState>(
+        condition: (prevState, state) {
+          return prevState != state;
+        },
+        builder: (context, state) {
+          return Container(
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                FullBackground(),
+                Positioned.fill(
+                  child: SafeArea(
+                    child: Container(
+                      padding: EdgeInsets.only(
+                          left: 10, right: 10, top: 60, bottom: 10),
+                      child: GameView(
+                          bloc: BlocProvider.of<CRBloc>(context), state: state),
+                    ),
                   ),
-                  Positioned.fill(
-                      child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[],
-                  )),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+                Positioned.fill(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[],
+                )),
+                CustomBackButton()
+              ],
+            ),
+          );
+        },
       ),
     );
   }

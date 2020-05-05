@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_flame_demo/screens/versus_bot_screen.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/screens/landing_screen.dart';
 import 'package:flutter_flame_demo/screens/game_screen.dart';
@@ -43,6 +44,10 @@ class Routes {
       case AppRoutes.base:
         return CupertinoPageRoute(
             settings: settings, builder: (_) => LandingScreen());
+        break;
+      case AppRoutes.versus_bot:
+        return CupertinoPageRoute(
+            settings: settings, builder: (_) => VersusBotScreen());
         break;
       case AppRoutes.play_game:
         return ScaleRoute(page: GameScreen());

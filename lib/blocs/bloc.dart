@@ -6,7 +6,7 @@ import 'package:flutter_flame_demo/blocs/state.dart';
 class CRBloc extends Bloc<CREvent, CRState> {
   @override
   CRState get initialState {
-    return CRState(gameMode: GameMode.PlayWithBot, players: []);
+    return CRState(gameMode: GameMode.PlayVersusBot, players: []);
   }
 
   @override

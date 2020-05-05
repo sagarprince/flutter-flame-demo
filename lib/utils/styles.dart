@@ -43,11 +43,14 @@ class AppColors {
 }
 
 class AppFonts {
-  static const String primary = 'DM Sans';
+  static const String primary = 'Roboto Slab';
   static const String secondary = 'Audiowide';
+  static const String third = 'Bungee Inline';
 }
 
 class AppTextStyles {
   static const TextStyle regularText = const TextStyle(
       fontSize: 16.0, fontWeight: FontWeight.w600, color: AppColors.white);
+  static const TextStyle landingHeadingText = const TextStyle(
+      fontFamily: AppFonts.third, fontSize: 42.0, color: AppColors.cardinal);
 }

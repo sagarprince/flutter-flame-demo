@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flame/components/component.dart';
+import 'package:flame/sprite.dart';
 import 'package:flutter_flame_demo/utils/styles.dart';
 
 class Background extends PositionComponent {
-  static final Paint _paint = Paint()..color = AppColors.black;
+  Sprite bgSprite;
+  Rect bgRect;
 
   Background() {
     x = y = 0;
+    bgSprite = Sprite('background.jpg');
   }
 
   @override
   void render(Canvas c) {
     prepareCanvas(c);
-    c.drawRect(toRect(), _paint);
+    bgSprite.renderRect(c, bgRect);
   }
 
   @override
@@ -22,5 +25,11 @@ class Background extends PositionComponent {
   void resize(Size size) {
     this.width = size.width;
     this.height = size.height;
+    bgRect = Rect.fromLTWH(
+      0,
+      0,
+      width,
+      height,
+    );
   }
 }

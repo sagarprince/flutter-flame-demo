@@ -6,6 +6,9 @@ import 'package:flutter_flame_demo/utils/styles.dart';
 import 'package:flutter_flame_demo/blocs/events.dart';
 import 'package:flutter_flame_demo/blocs/state.dart';
 import 'package:flutter_flame_demo/blocs/bloc.dart';
+import 'package:flutter_flame_demo/widgets/full_background.dart';
+import 'package:flutter_flame_demo/widgets/game_rules_modal.dart';
+import 'package:flutter_flame_demo/widgets/play_game_button.dart';
 
 class LandingScreen extends StatelessWidget {
   LandingScreen({Key key}) : super(key: key);
@@ -13,39 +16,65 @@ class LandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                RaisedButton(
-                  color: Colors.transparent,
-                  highlightColor: Colors.grey.withOpacity(0.6),
-                  elevation: 0.0,
-                  padding: EdgeInsets.all(15.0),
-                  child: Text(
-                    'Play Game',
-                    style: TextStyle(
-                        fontFamily: AppFonts.secondary,
-                        fontSize: 28.0,
-                        color: AppColors.white),
-                  ),
-                  onPressed: () {
-                    BlocProvider.of<CRBloc>(context).add(StartGameEvent(
-                        gameMode: GameMode.PlayWithBot,
-                        players: [
-                          Player('Sagar', 'red', true),
-                          Player('Bot', 'green', false),
-                        ]));
-                    Navigator.of(context).pushNamed(AppRoutes.play_game);
-                  },
-                )
-              ],
-            )
-          ],
-        ),
+      body: Stack(
+        children: <Widget>[
+          FullBackground(),
+          Positioned.fill(
+            child: Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset(
+                        'assets/images/logo.png',
+                        width: 100,
+                      ),
+                      SizedBox(height: 30.0),
+                      Text('CHAIN', style: AppTextStyles.landingHeadingText),
+                      Text(
+                        'REACTION',
+                        style: AppTextStyles.landingHeadingText,
+                      ),
+                      SizedBox(height: 60.0),
+                      Row(
+                        children: <Widget>[
+                          PlayGameButton(
+                            icon1: Icons.play_arrow,
+                            icon2: Icons.computer,
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .pushNamed(AppRoutes.versus_bot);
+                            },
+                          ),
+                          SizedBox(width: 40.0),
+                          PlayGameButton(
+                            icon1: Icons.play_arrow,
+                            icon2: Icons.group,
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 30.0),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 40,
+            right: 15,
+            child: IconButton(
+              icon: Icon(Icons.info_outline,
+                  color: Colors.blueAccent, size: 38.0),
+              onPressed: () {
+                showGameRulesDialog(context);
+              },
+            ),
+          )
+        ],
       ),
     );
   }

@@ -9,7 +9,7 @@ class StartGameEvent extends CREvent {
   GameMode gameMode;
   List<Player> players;
 
-  StartGameEvent({this.gameMode = GameMode.PlayWithBot, this.players})
+  StartGameEvent({this.gameMode = GameMode.PlayVersusBot, this.players})
       : assert(players != null && players.length != 0);
 }
 

@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
+import 'package:flutter_flame_demo/widgets/full_background.dart';
 import 'package:line_awesome_icons/line_awesome_icons.dart';
 import "package:flare_flutter/flare_actor.dart";
 import "package:flare_flutter/flare_cache_builder.dart";
@@ -24,6 +25,7 @@ class ResultScreen extends StatefulWidget {
 
 class _ResultScreenState extends State<ResultScreen> {
   final CharacterController characterController = CharacterController();
+  bool isNavigating = false;
 
   void _resetWinner(BuildContext context) {
     BlocProvider.of<CRBloc>(context).add(SetWinnerEvent(Player('', '', true)));
@@ -31,7 +33,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
   Widget _animatedFireworks(GameMode gameMode, Player winner) {
     bool isVisible = true;
-    if (gameMode == GameMode.PlayWithBot && !winner.isHuman) {
+    if (gameMode == GameMode.PlayVersusBot && !winner.isHuman) {
       isVisible = false;
     }
 
@@ -57,7 +59,7 @@ class _ResultScreenState extends State<ResultScreen> {
   Widget _animatedCharacter(GameMode gameMode, Player winner) {
     var asset =
         AssetFlare(bundle: rootBundle, name: 'assets/flares/character.flr');
-    if (gameMode == GameMode.PlayWithBot && !winner.isHuman) {
+    if (gameMode == GameMode.PlayVersusBot && !winner.isHuman) {
       characterController.setSuccess(false);
     } else {
       characterController.setSuccess(true);
@@ -81,7 +83,7 @@ class _ResultScreenState extends State<ResultScreen> {
   Widget _card(GameMode gameMode, Player winner) {
     String heading = 'Congratulations';
     String message = '';
-    if (gameMode == GameMode.PlayWithBot) {
+    if (gameMode == GameMode.PlayVersusBot) {
       if (winner.isHuman) {
         message = 'You Won !!!';
       } else {
@@ -134,6 +136,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 icon: Icon(LineAwesomeIcons.home,
                     color: AppColors.white, size: 32.0),
                 onPressed: () {
+                  isNavigating = true;
                   _resetWinner(context);
                   Navigator.of(context).pushReplacementNamed(AppRoutes.base);
                 },
@@ -143,6 +146,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 icon: Icon(LineAwesomeIcons.refresh,
                     color: AppColors.white, size: 32.0),
                 onPressed: () {
+                  isNavigating = true;
                   _resetWinner(context);
                   Navigator.of(context)
                       .pushReplacementNamed(AppRoutes.play_game);
@@ -161,17 +165,17 @@ class _ResultScreenState extends State<ResultScreen> {
     double cardBottomPosition = height > 600 ? 50 : 20;
     double cardHeight = height > 600 ? (height / 3) : 180;
     return Scaffold(
-        body: BlocBuilder<CRBloc, CRState>(builder: (context, state) {
+        body: BlocBuilder<CRBloc, CRState>(condition: (previousState, state) {
+      if (isNavigating) {
+        return false;
+      }
+      return true;
+    }, builder: (context, state) {
       return Container(
-        decoration: BoxDecoration(
-          gradient: new RadialGradient(
-            colors: [Color(0xFF070144), Color(0xFF090234)],
-            radius: 0.4,
-          ),
-        ),
         child: Stack(
           fit: StackFit.loose,
           children: <Widget>[
+            FullBackground(),
             Positioned.fill(
               child: _animatedFireworks(state.gameMode, state.winner),
             ),

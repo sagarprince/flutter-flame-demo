@@ -40,7 +40,7 @@ class CREngine {
     this._state = state;
     this.allPlayers = _state.players;
     _playerTurn = allPlayers[0].color;
-    _isBotEnabled = _state.gameMode == GameMode.PlayWithBot ? true : false;
+    _isBotEnabled = _state.gameMode == GameMode.PlayVersusBot ? true : false;
     this._board = Board(rows, cols, _isBotEnabled);
     this._players = _buildPlayers();
     this._onWinner = onWinner;

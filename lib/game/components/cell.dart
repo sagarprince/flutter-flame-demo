@@ -36,7 +36,7 @@ class Cell extends PositionComponent with Tapable {
     _tappedPaint = Paint()
       ..style = PaintingStyle.fill
       ..strokeWidth = 1
-      ..color = const Color(0xff777777);
+      ..color = const Color(0xFFDDDDDD).withOpacity(0.5);
   }
 
   @override
@@ -54,19 +54,20 @@ class Cell extends PositionComponent with Tapable {
 
   @override
   void onTapUp(TapUpDetails details) {
+    int orbs = positionData[0];
+    CellInfo cellInfo = positionData[1];
+    if (orbs <= 3 &&
+        (cellInfo.player == _engine.playerTurn || cellInfo.player == '') &&
+        !_engine.isChainReaction &&
+        _beenTapped) {
+      this._engine.humanMove(pos, _engine.playerTurn);
+    }
     _beenTapped = false;
   }
 
   @override
   void onTapDown(TapDownDetails details) {
-    int orbs = positionData[0];
-    CellInfo cellInfo = positionData[1];
-    if (orbs <= 3 &&
-        (cellInfo.player == _engine.playerTurn || cellInfo.player == '') &&
-        !_engine.isChainReaction) {
-      _beenTapped = true;
-      this._engine.humanMove(pos, _engine.playerTurn);
-    }
+    _beenTapped = true;
   }
 
   @override

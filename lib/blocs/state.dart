@@ -32,4 +32,4 @@ class CRState extends Equatable {
   }
 }
 
-enum GameMode { PlayWithBot, MultiPlayerOffline, MultiPlayerOnline }
+enum GameMode { PlayVersusBot, MultiPlayerOffline, MultiPlayerOnline }

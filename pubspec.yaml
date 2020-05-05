@@ -48,18 +48,24 @@ flutter:
   uses-material-design: true
 
   fonts:
-    - family: DM Sans
+    - family: Roboto Slab
       fonts:
-        - asset: assets/fonts/DMSans-Bold.ttf
-        - asset: assets/fonts/DMSans-BoldItalic.ttf
-        - asset: assets/fonts/DMSans-Italic.ttf
-        - asset: assets/fonts/DMSans-Medium.ttf
-        - asset: assets/fonts/DMSans-MediumItalic.ttf
-        - asset: assets/fonts/DMSans-Regular.ttf
+        - asset: assets/fonts/RobotoSlab-Bold.ttf
+        - asset: assets/fonts/RobotoSlab-SemiBold.ttf
+        - asset: assets/fonts/RobotoSlab-Medium.ttf
+        - asset: assets/fonts/RobotoSlab-Regular.ttf
 
     - family: Audiowide
       fonts:
         - asset: assets/fonts/Audiowide-Regular.ttf
+
+    - family: Bungee Inline
+      fonts:
+        - asset: assets/fonts/BungeeInline-Regular.ttf
+
+    - family: Bungee Shade
+      fonts:
+        - asset: assets/fonts/BungeeShade-Regular.ttf
 
   assets:
     - assets/images/

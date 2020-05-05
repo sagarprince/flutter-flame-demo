@@ -25,6 +25,7 @@ class GameManager {
     await Flame.audio.loadAll(<String>[
       'pop.mp3',
     ]);
+    await Flame.images.loadAll(<String>['background.jpg']);
   }
 }
 
