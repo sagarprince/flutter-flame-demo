@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/utils/styles.dart';
 import 'package:flutter_flame_demo/utils/ui_utils.dart';
-import 'package:flutter_flame_demo/widgets/full_background.dart';
+import 'package:flutter_flame_demo/widgets/background.dart';
 import 'package:flutter_flame_demo/widgets/play_game_button.dart';
 
 class LandingScreen extends StatelessWidget {
@@ -11,70 +11,73 @@ class LandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          FullBackground(),
-          Positioned.fill(
-            child: Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Image.asset(
-                        'assets/images/logo.png',
-                        width: 100,
-                      ),
-                      SizedBox(height: 30.0),
-                      Text('CHAIN', style: AppTextStyles.landingHeadingText),
-                      Text(
-                        'REACTION',
-                        style: AppTextStyles.landingHeadingText,
-                      ),
-                      SizedBox(height: 60.0),
-                      Row(
-                        children: <Widget>[
-                          PlayGameButton(
-                            icon1: Icons.play_arrow,
-                            icon2: Icons.computer,
-                            onPressed: () {
-                              Navigator.of(context)
-                                  .pushNamed(AppRoutes.versus_bot);
-                            },
-                          ),
-                          SizedBox(width: 40.0),
-                          PlayGameButton(
-                            icon1: Icons.play_arrow,
-                            icon2: Icons.group,
-                            onPressed: () {
-                              Navigator.of(context)
-                                  .pushNamed(AppRoutes.multi_player);
-                            },
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 30.0),
-                    ],
-                  )
-                ],
-              ),
+      body: Background(
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/images/logo.png',
+                          width: 100,
+                        ),
+                        SizedBox(height: 30.0),
+                        Text('CHAIN', style: AppTextStyles.landingHeadingText),
+                        Text(
+                          'REACTION',
+                          style: AppTextStyles.landingHeadingText,
+                        ),
+                        SizedBox(height: 60.0),
+                        Row(
+                          children: <Widget>[
+                            PlayGameButton(
+                              icon1: Icons.play_arrow,
+                              icon2: Icons.computer,
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .pushNamed(AppRoutes.versus_bot);
+                              },
+                            ),
+                            SizedBox(width: 40.0),
+                            PlayGameButton(
+                              icon1: Icons.play_arrow,
+                              icon2: Icons.group,
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .pushNamed(AppRoutes.multi_player);
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 30.0),
+                      ],
+                    )
+                  ],
+                )
+              ],
             ),
-          ),
-          Positioned(
-            top: 40,
-            right: 15,
-            child: IconButton(
-              icon: Image.asset(
-                'assets/images/rules.png',
+            Positioned(
+              top: 40,
+              right: 15,
+              child: IconButton(
+                icon: Image.asset(
+                  'assets/images/rules.png',
+                ),
+                iconSize: 34.0,
+                onPressed: () {
+                  UiUtils.showGameRulesDialog(context);
+                },
               ),
-              iconSize: 34.0,
-              onPressed: () {
-                UiUtils.showGameRulesDialog(context);
-              },
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

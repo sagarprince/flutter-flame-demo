@@ -9,7 +9,7 @@ import 'package:flutter_flame_demo/shared_instances.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/utils/keys.dart';
 import 'package:flutter_flame_demo/utils/ui_utils.dart';
-import 'package:flutter_flame_demo/widgets/full_background.dart';
+import 'package:flutter_flame_demo/widgets/background.dart';
 
 class GameScreen extends StatelessWidget {
   GameScreen({Key key}) : super(key: key);
@@ -29,11 +29,10 @@ class GameScreen extends StatelessWidget {
             return prevState != state;
           },
           builder: (context, state) {
-            return Container(
+            return Background(
               child: Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
-                  FullBackground(),
                   Positioned.fill(
                     child: SafeArea(
                       child: Container(

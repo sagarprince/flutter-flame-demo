@@ -11,7 +11,7 @@ import 'package:flutter_flame_demo/blocs/bloc.dart';
 import 'package:flutter_flame_demo/widgets/animated_button.dart';
 import 'package:flutter_flame_demo/widgets/positional_back_button.dart';
 import 'package:flutter_flame_demo/widgets/color_chooser.dart';
-import 'package:flutter_flame_demo/widgets/full_background.dart';
+import 'package:flutter_flame_demo/widgets/background.dart';
 
 class VersusBotScreen extends StatefulWidget {
   VersusBotScreen({Key key}) : super(key: key);
@@ -46,11 +46,10 @@ class _VersusBotScreenState extends State<VersusBotScreen> {
     double paddingTop = MediaQuery.of(context).padding.top + 60;
     double paddingBottom = 70.0;
     return Scaffold(
-      body: Container(
+      body: Background(
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[
-            FullBackground(),
             Positioned.fill(
               child: Center(
                 child: SingleChildScrollView(

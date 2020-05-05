@@ -8,7 +8,7 @@ import 'package:flutter_flame_demo/blocs/state.dart';
 import 'package:flutter_flame_demo/blocs/bloc.dart';
 import 'package:flutter_flame_demo/widgets/animated_button.dart';
 import 'package:flutter_flame_demo/widgets/color_chooser.dart';
-import 'package:flutter_flame_demo/widgets/full_background.dart';
+import 'package:flutter_flame_demo/widgets/background.dart';
 import 'package:flutter_flame_demo/widgets/positional_back_button.dart';
 
 class MultiPlayerOfflineScreen extends StatefulWidget {
@@ -92,105 +92,108 @@ class _MultiPlayerOfflineScreenState extends State<MultiPlayerOfflineScreen> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double paddingTop = MediaQuery.of(context).padding.top;
-    double paddingBottom = 70.0;
 
     return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          FullBackground(),
-          Positioned.fill(
-            child: Center(
-              child: SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                child: Container(
-                  margin: EdgeInsets.only(
-                      top: (paddingTop + 140), bottom: paddingBottom),
+      body: Background(
+        child: Stack(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.only(top: (paddingTop + 120)),
+              child: Center(
+                child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: players.map((p) {
-                      return playerColorChooser(p);
-                    }).toList(),
+                    children: <Widget>[
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: players.map((p) {
+                          return playerColorChooser(p);
+                        }).toList(),
+                      ),
+                      SizedBox(height: 60.0),
+                    ],
                   ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            top: (paddingTop + 25),
-            child: Container(
-              width: width,
-              child: Column(
-                children: <Widget>[
-                  Text('Number of Players', style: AppTextStyles.regularText),
-                  SizedBox(height: 15.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(
-                        width: 40.0,
-                        height: 40.0,
-                        child: AnimatedButton(
-                            child: Icon(Icons.remove,
+            Positioned(
+              top: (paddingTop + 25),
+              child: Container(
+                width: width,
+                child: Column(
+                  children: <Widget>[
+                    Text('Number of Players', style: AppTextStyles.regularText),
+                    SizedBox(height: 15.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        SizedBox(
+                          width: 40.0,
+                          height: 40.0,
+                          child: AnimatedButton(
+                              child: Icon(Icons.remove,
+                                  size: 35.0, color: AppColors.white),
+                              onPressed: () {
+                                setPlayersCount(false);
+                              }),
+                        ),
+                        SizedBox(
+                          width: 100.0,
+                          child: Center(
+                            child: Text(playersCount.toString(),
+                                style: AppTextStyles.regularText
+                                    .copyWith(fontSize: 24.0)),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 40.0,
+                          height: 40.0,
+                          child: AnimatedButton(
+                            child: Icon(Icons.add,
                                 size: 35.0, color: AppColors.white),
                             onPressed: () {
-                              setPlayersCount(false);
-                            }),
-                      ),
-                      SizedBox(
-                        width: 100.0,
-                        child: Center(
-                          child: Text(playersCount.toString(),
-                              style: AppTextStyles.regularText
-                                  .copyWith(fontSize: 24.0)),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 40.0,
-                        height: 40.0,
-                        child: AnimatedButton(
-                          child: Icon(Icons.add,
-                              size: 35.0, color: AppColors.white),
+                              setPlayersCount(true);
+                            },
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
+            AnimatedPositioned(
+              duration: Duration(milliseconds: 400),
+              bottom: isPlayersColorsSelected() ? 15 : -100,
+              curve: Curves.easeIn,
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(top: 30.0),
+                      width: 200,
+                      height: 48.0,
+                      child: AnimatedButton(
+                          child: Text('START', style: AppTextStyles.buttonText),
                           onPressed: () {
-                            setPlayersCount(true);
-                          },
-                        ),
-                      )
-                    ],
-                  )
-                ],
+                            BlocProvider.of<CRBloc>(context).add(StartGameEvent(
+                                gameMode: GameMode.MultiPlayerOffline,
+                                players: players));
+                            Navigator.of(context)
+                                .pushNamed(AppRoutes.play_game);
+                          }),
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 400),
-            bottom: isPlayersColorsSelected() ? 15 : -100,
-            curve: Curves.easeIn,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(top: 30.0),
-                    width: 200,
-                    height: 48.0,
-                    child: AnimatedButton(
-                        child: Text('START', style: AppTextStyles.buttonText),
-                        onPressed: () {
-                          BlocProvider.of<CRBloc>(context).add(StartGameEvent(
-                              gameMode: GameMode.MultiPlayerOffline,
-                              players: players));
-                          Navigator.of(context).pushNamed(AppRoutes.play_game);
-                        }),
-                  )
-                ],
-              ),
-            ),
-          ),
-          PositionalBackButton(),
-        ],
+            PositionalBackButton(),
+          ],
+        ),
       ),
     );
   }

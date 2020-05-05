@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:flutter_flame_demo/utils/constants.dart';
-import 'package:flutter_flame_demo/widgets/full_background.dart';
+import 'package:flutter_flame_demo/widgets/background.dart';
 import 'package:line_awesome_icons/line_awesome_icons.dart';
 import "package:flare_flutter/flare_actor.dart";
 import "package:flare_flutter/flare_cache_builder.dart";
@@ -171,11 +171,10 @@ class _ResultScreenState extends State<ResultScreen> {
       }
       return true;
     }, builder: (context, state) {
-      return Container(
+      return Background(
         child: Stack(
           fit: StackFit.loose,
           children: <Widget>[
-            FullBackground(),
             Positioned.fill(
               child: _animatedFireworks(state.gameMode, state.winner),
             ),
