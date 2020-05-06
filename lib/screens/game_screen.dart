@@ -10,6 +10,7 @@ import 'package:flutter_flame_demo/utils/constants.dart';
 import 'package:flutter_flame_demo/utils/keys.dart';
 import 'package:flutter_flame_demo/utils/ui_utils.dart';
 import 'package:flutter_flame_demo/widgets/background.dart';
+import 'package:flutter_flame_demo/widgets/volume_button.dart';
 
 class GameScreen extends StatelessWidget {
   GameScreen({Key key}) : super(key: key);
@@ -72,12 +73,7 @@ class GameScreen extends StatelessWidget {
                           ),
                           Row(
                             children: <Widget>[
-                              IconButton(
-                                icon:
-                                    Icon(Icons.volume_up, color: Colors.white),
-                                iconSize: 34.0,
-                                onPressed: () {},
-                              ),
+                              VolumeButton(),
                               IconButton(
                                 icon: Image.asset(
                                   'assets/images/rules.png',

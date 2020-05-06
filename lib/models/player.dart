@@ -10,7 +10,7 @@ class Player extends Equatable {
   final String name;
 
   /// The Color.
-  String color;
+  final String color;
 
   /// The Human.
   final bool isHuman;
