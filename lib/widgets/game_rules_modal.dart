@@ -22,11 +22,15 @@ class GameRulesDialog extends StatelessWidget {
                     child: Column(
                       children: <Widget>[
                         Text(
-                            'I will be describing the rules of the two-player (Red and Green) game but this could be generalized to any number of players.',
+                            'The objective of Chain Reaction is to take control of the board by eliminating your opponent orbs.',
+                            style: AppTextStyles.rulesText),
+                        SizedBox(height: 10.0),
+                        Text(
+                            'It will describing the rules of the two-player (Red and Green) game but this could be generalized to any number of players.',
                             style: AppTextStyles.rulesText),
                         SizedBox(height: 15.0),
                         Text(
-                            '1) The gameplay takes place in an m \times nm×n board. The most commonly used size of the board is 9 \times 69×6.',
+                            '1) The gameplay takes place in an m×n board. The most commonly used size of the board is 9×6.',
                             style: AppTextStyles.rulesText),
                         SizedBox(height: 10.0),
                         Text(
