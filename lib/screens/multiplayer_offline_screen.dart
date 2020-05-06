@@ -158,7 +158,11 @@ class _MultiPlayerOfflineScreenState extends State<MultiPlayerOfflineScreen> {
                           style: AppTextStyles.mediumText,
                           textAlign: TextAlign.center,
                           onChanged: (String value) {
-                            player['name'] = value;
+                            if (value.trim() != '') {
+                              player['name'] = value;
+                            } else {
+                              player['name'] = 'Player ${player['id']}';
+                            }
                           },
                         ),
                       ),
