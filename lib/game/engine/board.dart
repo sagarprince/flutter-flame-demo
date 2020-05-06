@@ -108,7 +108,7 @@ class Board {
       positionData.isExplode = true;
       ExplodeSound.play();
       await new Future.delayed(Duration(
-          milliseconds: unstable.length > (complexityLimit - 2) ? 100 : 220));
+          milliseconds: unstable.length > (complexityLimit - 2) ? 120 : 220));
       _matrix[pos.i][pos.j][0] -= criticalMass(pos);
       List<dynamic> neighbours = findNeighbours(pos);
       neighbours.forEach((nPos) {
